@@ -22,7 +22,18 @@ var skull = {
     icon_path: '/static/img/skull.svg',
     position: {latitude: 66.148903, longitude: -18.905641}
 };
-var places = [crossbow, skull];
+var school = {
+    id: "school",
+    icon_path: '/static/img/school.png',
+    position: {latitude: 66.153109, longitude: -18.911886}
+};
+var allinn = {
+    id: "allinn",
+    icon_path: '/static/img/allinn.png',
+    position: {latitude: 66.152959, longitude: -18.907817}
+};
+
+var places = [crossbow, skull, school, allinn];
 
 var scale = 20000.0;
 
@@ -80,12 +91,18 @@ function positionChanged(position) {
     // Add places to map
     $("#crossbow").css("position", "absolute").css("width", "20px");
     $("#skull").css("position", "absolute").css("width", "20px");
+    $("#school").css("position", "absolute").css("width", "20px");
+    $("#allinn").css("position", "absolute").css("width", "20px");
 
     // Locate places relative to you, and scale map
     $("#crossbow").css("left", (crossbow.position.longitude - you.position.longitude) * scale);
     $("#crossbow").css("top", -(crossbow.position.latitude - you.position.latitude) * scale);
     $("#skull").css("left", (skull.position.longitude - you.position.longitude) * scale);
     $("#skull").css("top", -(skull.position.latitude - you.position.latitude) * scale);
+    $("#school").css("left", (school.position.longitude - you.position.longitude) * scale);
+    $("#school").css("top", -(school.position.latitude - you.position.latitude) * scale);
+    $("#allinn").css("left", (allinn.position.longitude - you.position.longitude) * scale);
+    $("#allinn").css("top", -(allinn.position.latitude - you.position.latitude) * scale);
 
 
     $("#debug #location").text("Timestamp: " + position.timestamp
@@ -113,5 +130,6 @@ function deviceOrientationChanged(orientationEvent)
         $("#map").css("transform-origin",  "" + (0) + "% " + (0) + "%");
         // Rotate map around "you"
         $("#map").css("transform", "rotate(" + (-compassDirection) + "deg)");
+        $("#school").css("transform", "rotate(" + (180-compassDirection) + "deg)");
     }
 }
