@@ -37,7 +37,7 @@ Run
 
 to find your IP address.
 
-Open a browser on a smart phone / tablet. Type in the IP address you've looked up, but replace the last two section of the IP address with `1.100`, and append the port created when you launched the server.
+Open a browser on a smart phone / tablet. Type in the IP address you've looked up, but replace the last two sections of the IP address with `1.100`, and append the port created when you launched the server.
 
 Usage example
 -------------
