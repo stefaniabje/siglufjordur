@@ -1,5 +1,5 @@
 html {
-    background-color: #000;
+    background-color: #fff;
 }
 
 #viewport
@@ -14,17 +14,4 @@ html {
     background-color: transparent;
     z-index: 1000;
     position: absolute;
-}
-
-#you {
-    position:fixed;
-    width: 20px;
-    height: 20px;
-/*    left: 45%;
-    top: 45%;*/
-    z-index: 100;
-}
-
-#map {
-    position:fixed;
 }
