@@ -33,29 +33,33 @@ var althyduhusid = {
 };
 var chrysler = {
     id: "chrysler",
-    position: {latitude: 66.152836, longitude: -18.9081194},
+    position: {latitude: 66.152836, longitude: -18.910131},
 };
 var good = {
     id: "good",
-    position: {latitude: 66.152727, longitude: -18.910131},
+    position: {latitude: 66.1529322714, longitude: -18.9079409},
+    timecode: {start: 0, end: 5}
 };
 var bad = {
     id: "bad",
-    position: {latitude: 66.1527944, longitude: -18.908025},
+    position: {latitude: 66.15277033, longitude: -18.90802432},
+    timecode: {start: 5, end: 10}
 };
 var hot = {
     id: "hot",
-    position: {latitude: 66.1527083, longitude: -18.907372},
+    position: {latitude: 66.15291052, longitude: -18.9076722879},
+    timecode: {start: 10, end: 15}
 };
 var cool = {
     id: "cool",
-    position: {latitude: 66.1525277, longitude: -18.90751666},
+    position: {latitude: 66.152826366, longitude: -18.9080556761},
+    timecode: {start: 15, end: 20}
 };
 
-var places = [crossbow, skull, school, althyduhusid, chrysler];
+var places = [crossbow, skull, school, althyduhusid, chrysler,good, bad, hot, cool];
 
 // pixels per km
-var scale = 300.0; 
+var scale = 10000.0; 
 // Depending on globe location, there is a certain scale between
 // degrees and kilometers, not identical for longitude and latitude.
 // In Siglufjörður it is the following:
@@ -151,13 +155,14 @@ function positionChanged(position) {
         $("#" + places[place].id).css("left", places[place].pxl_position.x).css("top", places[place].pxl_position.y);
     }
 
-    $("#debug #location").text("Timestamp: " + position.timestamp
-        + ", lat: " + coords.latitude
-        + ", lon: " + coords.longitude
-        + ", accuracy: " + coords.accuracy
-        + ", school: " + distanceTo(school.position)
-        + ", Alþýðuhúsið: " + distanceTo(althyduhusid.position)
-        + ", Chrysler: " + distanceTo(chrysler.position)
+    $("#debug").text("Timestamp: " + position.timestamp + "\n"
+        + "Lat: " + coords.latitude + "\n"
+        + "Lon: " + coords.longitude + "\n"
+        + "Accuracy: " + coords.accuracy + "\n"
+        + "Cool: " + distanceTo(cool.position) + "\n"
+        + " Hot: " + distanceTo(hot.position) + "\n"
+        + "Good: " + distanceTo(good.position) + "\n"
+        + " Bad: " + distanceTo(bad.position) + "\n"
     );
 //     $("#debug #window").text("Window width: " + window.innerWidth
 //         + ", window height: " + window.innerHeight
@@ -168,10 +173,10 @@ function positionChanged(position) {
             // Hiding button
             $('#button').css('display', 'none');
 
-            althyduhusid.havePlayed = true; // Added this to fix that the button
+            cool.havePlayed = true; // Added this to fix that the button
                                             // immediately showed up again
         };
-        if (distanceTo(chrysler.position) <  3 && chrysler.havePlayed == false) {
+        if (distanceTo(cool.position) <  3 && cool.havePlayed == false) {
             // Showing button
             $('#button').css({
                 'display': 'initial',
