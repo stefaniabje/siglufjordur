@@ -14,39 +14,44 @@ var center = {
 
 var crossbow = {
     id: "crossbow",
-    icon_path: '/static/img/x.png',
-    position: {latitude: 66.152076, longitude: -18.908227}
+    position: {latitude: 66.1486, longitude: -18.908227}
 };
 var skull = {
     id: "skull",
-    icon_path: '/static/img/skull.svg',
     position: {latitude: 66.148903, longitude: -18.905641}
 };
 var school = {
     id: "school",
-    icon_path: '/static/img/school.png',
     position: {latitude: 66.153109, longitude: -18.911886}
 };
 var althyduhusid = {
     id: "althyduhusid",
-    icon_path: '/static/img/althyduhusid.png',
     position: {latitude: 66.152959, longitude: -18.907817},
-    havePlayed: false
+};
+var chrysler = {
+    id: "chrysler",
+    position: {latitude: 66.152836, longitude: -18.910131},
 };
 
-var places = [crossbow, skull, school, althyduhusid];
+var places = [crossbow, skull, school, althyduhusid, chrysler];
 
-var scale = 40000.0;
+// Scale of pixels per km
+var scale = 30000.0; 
 // Depending on globe location, there is a certain scale between
 // degrees and kilometers, not identical for longitude and latitude.
 // In Siglufjörður it is the following:
 var km_per_degree = {longitude: 0.749, latitude: 1.853}
 
 
-$(function () {
-    // for (var place in places) {
 
-    // }
+
+$(function () {
+
+    // Initialize places
+    for (var place in places) {
+        $("#" + places[place].id).attr("src", "/static/img/" + places[place].id + ".png");
+        places[place]["havePlayed"] = false;
+    }
 
     $("#viewport").height(windowHeight);
 
@@ -59,7 +64,7 @@ $(function () {
         alert("No GPS!");
     }
 
-    // If the user's device has orientation (LG7II does not have it for example)
+    // If the user'device s has orientation (LG7II does not have it for example)
     if (window.DeviceOrientationEvent) {
         // Follow the orientation changes as events
         window.addEventListener('deviceorientation', deviceOrientationChanged, false);
@@ -102,14 +107,12 @@ function positionChanged(position) {
     $("#you").css("top", - $("#you").height() / 2.0);
 
     // Add places to map
-    $("#school").css("position", "absolute").css(
+    for (var place in places) {
+        $("#" + places[place].id).css("position", "absolute").css(
         "width", "20px").css(
-        "left", - $("#school").width() / 2.0).css(
-        "top", - $("#school").height() / 2.0);
-    $("#althyduhusid").css("position", "absolute").css(
-        "width", "20px").css(
-        "left", - $("#althyduhusid").width() / 2.0).css(
-        "top", - $("#althyduhusid").height() / 2.0);
+        "left", - $("#" + places[place].id).width() / 2.0).css(
+        "top", - $("#" + places[place].id).height() / 2.0);
+    }
 
 
     function pixelfy(place_position) {
@@ -123,12 +126,11 @@ function positionChanged(position) {
     return pxl_position;
     }
 
-
-    school["pxl_position"] = pixelfy(school.position);
-    $("#school").css("left", school.pxl_position.x).css("top", school.pxl_position.y);
-    althyduhusid["pxl_position"] = pixelfy(althyduhusid.position);
-    $("#althyduhusid").css("left", althyduhusid.pxl_position.x).css("top", althyduhusid.pxl_position.y);
-
+    // Move all places to their place
+    for (var place in places) {
+        places[place]["pxl_position"] = pixelfy(places[place].position);
+        $("#" + places[place].id).css("left", places[place].pxl_position.x).css("top", places[place].pxl_position.y);
+    }
 
     $("#debug #location").text("Timestamp: " + position.timestamp
         + ", lat: " + coords.latitude
@@ -157,8 +159,11 @@ function deviceOrientationChanged(orientationEvent)
         $("#map").css("transform-origin",  "" + (0) + "% " + (0) + "%");
         // Rotate map around "you"
         $("#map").css("transform", "rotate(" + (-compassDirection) + "deg)");
-        $("#school").css("transform", "rotate(" + (compassDirection) + "deg)");
-        $("#althyduhusid").css("transform", "rotate(" + (compassDirection) + "deg)");
+        // Rotate the icons back
+        for(var place in places){
+            $("#" + places[place].id).css("transform", "rotate(" + (compassDirection) + "deg)");        
+        }
+
         var onClick = function() {
             $('#wave')[0].load(); // audio will load
             // Hiding button
@@ -181,6 +186,5 @@ function deviceOrientationChanged(orientationEvent)
             // Hiding button if leaving correct span
             $('#button').css('display', 'none');
         }
-
     }
 }
