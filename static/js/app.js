@@ -12,6 +12,9 @@ var center = {
     top: windowHeight / 2.0
 };
 
+// The user's coordinates. Global for acces in other functions.
+var coords;
+
 var crossbow = {
     id: "crossbow",
     position: {latitude: 66.1486, longitude: -18.908227}
@@ -30,17 +33,33 @@ var althyduhusid = {
 };
 var chrysler = {
     id: "chrysler",
-    position: {latitude: 66.152836, longitude: -18.910131},
+    position: {latitude: 66.152836, longitude: -18.9081194},
+};
+var good = {
+    id: "good",
+    position: {latitude: 66.152727, longitude: -18.910131},
+};
+var bad = {
+    id: "bad",
+    position: {latitude: 66.1527944, longitude: -18.908025},
+};
+var hot = {
+    id: "hot",
+    position: {latitude: 66.1527083, longitude: -18.907372},
+};
+var cool = {
+    id: "cool",
+    position: {latitude: 66.1525277, longitude: -18.90751666},
 };
 
 var places = [crossbow, skull, school, althyduhusid, chrysler];
 
-// Scale of pixels per km
-var scale = 30000.0; 
+// pixels per km
+var scale = 300.0; 
 // Depending on globe location, there is a certain scale between
 // degrees and kilometers, not identical for longitude and latitude.
 // In Siglufjörður it is the following:
-var km_per_degree = {longitude: 0.749, latitude: 1.853}
+var km_per_degree = {longitude: 44.96, latitude: 111.18};
 
 
 
@@ -51,6 +70,7 @@ $(function () {
     for (var place in places) {
         $("#" + places[place].id).attr("src", "/static/img/" + places[place].id + ".png");
         places[place]["havePlayed"] = false;
+        $("#" + places[place].id).css("position", "absolute").css("width", "20px");
     }
 
     $("#viewport").height(windowHeight);
@@ -86,7 +106,7 @@ $(function () {
 
 function positionChanged(position) {
 
-    var coords = position.coords;
+    coords = position.coords;
 
     var you = {
         id: "you",
@@ -108,10 +128,9 @@ function positionChanged(position) {
 
     // Add places to map
     for (var place in places) {
-        $("#" + places[place].id).css("position", "absolute").css(
-        "width", "20px").css(
-        "left", - $("#" + places[place].id).width() / 2.0).css(
-        "top", - $("#" + places[place].id).height() / 2.0);
+        //.css("left", - $("#" + places[place].id).width() / 2.0).css( // left is redefined later, so this never comes in effect.
+        //"top", - $("#" + places[place].id).height() / 2.0)
+        ;
     }
 
 
@@ -136,35 +155,15 @@ function positionChanged(position) {
         + ", lat: " + coords.latitude
         + ", lon: " + coords.longitude
         + ", accuracy: " + coords.accuracy
+        + ", school: " + distanceTo(school.position)
+        + ", Alþýðuhúsið: " + distanceTo(althyduhusid.position)
+        + ", Chrysler: " + distanceTo(chrysler.position)
     );
 //     $("#debug #window").text("Window width: " + window.innerWidth
 //         + ", window height: " + window.innerHeight
 //     );
 
-
-}
-
-function deviceOrientationChanged(orientationEvent)
-{
-    var tiltLeftRight = orientationEvent.gamma;
-    var tiltFrontBack = orientationEvent.beta;
-    var compassDirection = orientationEvent.webkitCompassHeading;
-
-    if(compassDirection)
-    {
-        $("#debug #orientation").text("Degrees from North: " + compassDirection);
-
-
-        // Set z-axis of rotation at 0% of map, i.e. center of screen
-        $("#map").css("transform-origin",  "" + (0) + "% " + (0) + "%");
-        // Rotate map around "you"
-        $("#map").css("transform", "rotate(" + (-compassDirection) + "deg)");
-        // Rotate the icons back
-        for(var place in places){
-            $("#" + places[place].id).css("transform", "rotate(" + (compassDirection) + "deg)");        
-        }
-
-        var onClick = function() {
+    var onClick = function() {
             $('#wave')[0].load(); // audio will load
             // Hiding button
             $('#button').css('display', 'none');
@@ -172,7 +171,7 @@ function deviceOrientationChanged(orientationEvent)
             althyduhusid.havePlayed = true; // Added this to fix that the button
                                             // immediately showed up again
         };
-        if (compassDirection > 300 && althyduhusid.havePlayed == false) {
+        if (distanceTo(chrysler.position) <  3 && chrysler.havePlayed == false) {
             // Showing button
             $('#button').css({
                 'display': 'initial',
@@ -186,5 +185,34 @@ function deviceOrientationChanged(orientationEvent)
             // Hiding button if leaving correct span
             $('#button').css('display', 'none');
         }
+
+}
+
+function deviceOrientationChanged(orientationEvent)
+{
+    var tiltLeftRight = orientationEvent.gamma;
+    var tiltFrontBack = orientationEvent.beta;
+    var compassDirection = orientationEvent.webkitCompassHeading;
+
+    if(compassDirection)
+    {
+        $("#debug #orientation").text("Degrees from North: " + compassDirection);
+        // Set z-axis of rotation at 0% of map, i.e. center of screen
+        $("#map").css("transform-origin",  "" + (0) + "% " + (0) + "%");
+        // Rotate map around "you"
+        $("#map").css("transform", "rotate(" + (-compassDirection) + "deg)");
+        // Rotate the icons back
+        for(var place in places){
+            $("#" + places[place].id).css("transform", "rotate(" + (compassDirection) + "deg)");        
+        }
     }
+}
+
+// Calculates the distance to a place. Returns the answer in metres.
+function distanceTo(position){
+    var xs = (position.latitude - coords.latitude) * km_per_degree.latitude;
+    var ys = (position.longitude - coords.longitude) * km_per_degree.longitude;
+    xs = xs*xs;
+    ys = ys*ys;
+    return Math.sqrt(xs+ys)*1000;
 }
