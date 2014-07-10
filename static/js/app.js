@@ -80,10 +80,56 @@ var scale = 10000.0;
 var km_per_degree = {longitude: 44.96, latitude: 111.18};
 
 
+var audioPlayer = {
+    _nowPlayingPlace: null,
+    _player : null,
+    init: function()
+    {
+        this._player = $("#test")[0];
+        this._bindTimeupdate();
+    },
+
+    _bindTimeupdate: function()
+    {
+        var self = this; // Required because in the event callback, this becomes the event.
+
+        $("#test").bind("timeupdate", function()
+        {
+            if(!self._nowPlayingPlace)
+            {
+                self._player.pause();
+                return;
+            }
+
+            console.log(self._nowPlayingPlace);
+
+            if(self._player.currentTime >= self._nowPlayingPlace.timecode.end)
+            {
+                self._player.pause();
+                self._nowPlayingPlace = null;
+            }
+        });
+    },
+
+    preloadAudioSprite: function()
+    {
+        // This is a hack to preload the whole audio file without actually playing
+        // a sound. Must be initalized from a touch event context on mobile.
+        this._player.play();
+        this._player.pause();
+    },
+
+    playSoundForPlace: function (place)
+    {
+        this._player.currentTime = place.timecode.start;
+        this._player.play();
+
+        this._nowPlayingPlace = place;
+    }
+};
 
 
 $(function () {
-
     // Initialize places
     for (var place in places) {
         $("#" + places[place].id).attr("src", "/static/img/" + places[place].id + ".png");
@@ -111,16 +157,50 @@ $(function () {
         alert("No compass!");
     }
 
-    // $("#soundport")
     $("#button").css({
        'position': 'relative',
        width: '100px',
        'z-index': '500'
     });
-    $("#button").css('display', 'none')
+    $("#button").hide();
+
+    $("#viewport").hide();
+
+    audioPlayer.init();
+
+    $("#start-button").click(function()
+    {
+        audioPlayer.preloadAudioSprite();
+
+        $(this).text("Loading ...");
+    });
+
+    $("#test").bind("canplaythrough", function()
+    {
+        $("#alert").hide();
+        $("#viewport").show();
+
+        $(this).unbind("canplaythrough");
+    });
+
+    $("#button").click(function()
+    {
+        playSoundForNearestPlace();
+    });
 });
 
+function playSoundForNearestPlace()
+{
+    var place = getNearestPlace();
+    audioPlayer.playSoundForPlace(place);
+}
 
+
+function getNearestPlace () {
+    var placesWithSounds = [good, bad, hot, cool];
+    var randomPlace = placesWithSounds[Math.floor(Math.random() * placesWithSounds.length)];
+    return randomPlace;
+}
 
 function positionChanged(position) {
 
@@ -191,20 +271,22 @@ function positionChanged(position) {
                                 // immediately showed up again
     };
 
-    if (distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
+    if (cool.havePlayed === false)
+    { // distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
         // Showing button
         $('#button').css({
             'display': 'initial',
             "left": center.left - $('#button').width() / 2.0,
             "top": center.top - $('#button').height() / 2.0
         });
-        // Following button and reacting with onClick if it is clicked
-        $("#button").bind( "click", onClick);
-        // Jump to the right place in the audiofile.
-        $('#test').bind('canplay', function() {
-            this.currentTime = cool.timecode.start;
-        });
-        $('#test')[0].play();
+
+        // // Following button and reacting with onClick if it is clicked
+        // $("#button").bind( "click", onClick);
+        // // Jump to the right place in the audiofile.
+        // $('#test').bind('canplay', function() {
+        //     this.currentTime = cool.timecode.start;
+        // });
+        // $('#test')[0].play();
     } else {
         // Hiding button if leaving correct span
         $('#button').css('display', 'none');
