@@ -37,12 +37,12 @@ Run
 
 to find your IP address.
 
-Open a browser on a smart phone / tablet. Type in the IP address you've looked up, but replace the last two sections of the IP address with `1.100`, and append the port created when you launched the server.
+Open a browser on a smart phone / tablet. Type in the IP address you've looked up, and append the port created and displayed when you launched the server.
 
 Usage example
 -------------
 
 Say your IP address is `234.567.9.876`, and that you saw `http://0.0.0.0:5000/` when you launched the server, the URL you type into your phone's browser would be
 
-    234.567.1.100:5000
+    234.567.9.876:5000
 

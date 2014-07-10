@@ -21,19 +21,27 @@ var crossbow = {
 };
 var skull = {
     id: "skull",
-    position: {latitude: 66.148903, longitude: -18.905641}
+    position: {latitude: 66.148903, longitude: -18.905641},
+    timecode: {start: 0, end: 5},
+    playDistance: 5
 };
 var school = {
     id: "school",
-    position: {latitude: 66.153109, longitude: -18.911886}
+    position: {latitude: 66.153109, longitude: -18.911886},
+    timecode: {start: 0, end: 5},
+    playDistance: 5
 };
 var althyduhusid = {
     id: "althyduhusid",
     position: {latitude: 66.152959, longitude: -18.907817},
+    timecode: {start: 0, end: 5},
+    playDistance: 5
 };
 var chrysler = {
     id: "chrysler",
     position: {latitude: 66.152836, longitude: -18.910131},
+    timecode: {start: 0, end: 5},
+    playDistance: 5
 };
 var good = {
     id: "good",
@@ -173,29 +181,32 @@ function positionChanged(position) {
 //     );
 
     var onClick = function() {
-            $('#test')[0].load(); // audio will load
-            // Hiding button
-            $('#button').css('display', 'none');
 
-            cool.havePlayed = true; // Added this to fix that the button
-                                            // immediately showed up again
-        };
-        if (distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
-            // Showing button
-            $('#button').css({
-                'display': 'initial',
-                "left": center.left - $('#button').width() / 2.0,
-                "top": center.top - $('#button').height() / 2.0
-            });
-            // Following button and reacting with onClick if it is clicked
-            $("#button").bind( "click", onClick);
-            $('#test')[0].currentTime = cool.timecode.start;
-            $('#test')[0].play();
-        } else {
-            // Hiding button if leaving correct span
-            $('#button').css('display', 'none');
-        }
+        $('#test')[0].load(); // audio will load
+        // Hiding button
+        $('#button').css('display', 'none');
+        cool.havePlayed = true; // Added this to fix that the button
+                                // immediately showed up again
+    };
 
+    if (distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
+        // Showing button
+        $('#button').css({
+            'display': 'initial',
+            "left": center.left - $('#button').width() / 2.0,
+            "top": center.top - $('#button').height() / 2.0
+        });
+        // Following button and reacting with onClick if it is clicked
+        $("#button").bind( "click", onClick);
+        // Jump to the right place in the audiofile.
+        $('#test').bind('canplay', function() {
+            this.currentTime = cool.timecode.start;
+        });
+        $('#test')[0].play();
+    } else {
+        // Hiding button if leaving correct span
+        $('#button').css('display', 'none');
+    }
 }
 
 function deviceOrientationChanged(orientationEvent)
@@ -220,9 +231,9 @@ function deviceOrientationChanged(orientationEvent)
 
 // Calculates the distance to a place. Returns the answer in metres.
 function distanceTo(position){
-    var xs = (position.latitude - coords.latitude) * km_per_degree.latitude;
-    var ys = (position.longitude - coords.longitude) * km_per_degree.longitude;
-    xs = xs*xs;
-    ys = ys*ys;
-    return Math.sqrt(xs+ys)*1000;
+    var dx = (position.latitude - coords.latitude) * km_per_degree.latitude;
+    var dy = (position.longitude - coords.longitude) * km_per_degree.longitude;
+    dx = dx*dx;
+    dy = dy*dy;
+    return Math.sqrt(dx+dy)*1000;
 }
