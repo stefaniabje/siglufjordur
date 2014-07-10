@@ -18,7 +18,7 @@ var coords;
 
 var crossbow = {
     id: "crossbow",
-    position: {latitude: 66.1486, longitude: -18.908227}
+    position: {latitude: 66.1486, longitude: -18.908227},
     timecode: {start: 0, end: 5},
     playDistance: 5
 };
@@ -74,7 +74,7 @@ var cool = {
 var places = [crossbow, skull, school, althyduhusid, chrysler, good, bad, hot, cool];
 
 // pixels per km
-var scale = 8000.0; 
+var scale = 8000.0;
 // Depending on globe location, there is a certain scale between
 // degrees and kilometers, not identical for longitude and latitude.
 // In Siglufjörður it is the following:
