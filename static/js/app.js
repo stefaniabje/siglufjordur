@@ -19,6 +19,8 @@ var coords;
 var crossbow = {
     id: "crossbow",
     position: {latitude: 66.1486, longitude: -18.908227}
+    timecode: {start: 0, end: 5},
+    playDistance: 5
 };
 var skull = {
     id: "skull",
@@ -69,7 +71,7 @@ var cool = {
     playDistance: 20
 };
 
-var places = [crossbow, skull, school, althyduhusid, chrysler,good, bad, hot, cool];
+var places = [crossbow, skull, school, althyduhusid, chrysler, good, bad, hot, cool];
 
 // pixels per km
 var scale = 8000.0; 
@@ -164,6 +166,7 @@ function positionChanged(position) {
 //     );
 
     var onClick = function() {
+
         $('#test')[0].load(); // audio will load
         // Hiding button
         $('#button').css('display', 'none');
@@ -204,7 +207,7 @@ function deviceOrientationChanged(orientationEvent)
         $("#map").css("transform", "rotate(" + (-compassDirection) + "deg)");
         // Rotate the icons back
         for(var place in places){
-            $("#" + places[place].id).css("transform", "rotate(" + (compassDirection) + "deg)");       
+            $("#" + places[place].id).css("transform", "rotate(" + (compassDirection) + "deg)");
         }
         //$("#you").css("transform","rotate(" + compassdirection + "deg)");
     }
