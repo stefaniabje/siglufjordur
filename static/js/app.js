@@ -60,10 +60,10 @@ var cool = {
     playDistance: 2
 };
 
-var places = [crossbow, skull, school, althyduhusid, chrysler,good, bad, hot, cool];
+var places = [crossbow, skull, school, althyduhusid, chrysler, good, bad, hot, cool];
 
 // pixels per km
-var scale = 10000.0; 
+var scale = 10000.0;
 // Depending on globe location, there is a certain scale between
 // degrees and kilometers, not identical for longitude and latitude.
 // In Siglufjörður it is the following:
@@ -173,7 +173,7 @@ function positionChanged(position) {
 //     );
 
     var onClick = function() {
-            $('#wave')[0].load(); // audio will load
+            $('#test')[0].load(); // audio will load
             // Hiding button
             $('#button').css('display', 'none');
 
@@ -189,7 +189,8 @@ function positionChanged(position) {
             });
             // Following button and reacting with onClick if it is clicked
             $("#button").bind( "click", onClick);
-            $('#wave')[0].play();
+            $('#test')[0].currentTime = cool.timecode.start;
+            $('#test')[0].play();
         } else {
             // Hiding button if leaving correct span
             $('#button').css('display', 'none');
@@ -212,7 +213,7 @@ function deviceOrientationChanged(orientationEvent)
         $("#map").css("transform", "rotate(" + (-compassDirection) + "deg)");
         // Rotate the icons back
         for(var place in places){
-            $("#" + places[place].id).css("transform", "rotate(" + (compassDirection) + "deg)");        
+            $("#" + places[place].id).css("transform", "rotate(" + (compassDirection) + "deg)");
         }
     }
 }
