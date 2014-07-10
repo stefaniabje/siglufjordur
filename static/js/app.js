@@ -18,6 +18,8 @@ var coords;
 var crossbow = {
     id: "crossbow",
     position: {latitude: 66.1486, longitude: -18.908227}
+    timecode: {start: 0, end: 5},
+    playDistance: 5
 };
 var skull = {
     id: "skull",
