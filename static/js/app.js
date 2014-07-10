@@ -38,22 +38,26 @@ var chrysler = {
 var good = {
     id: "good",
     position: {latitude: 66.1529322714, longitude: -18.9079409},
-    timecode: {start: 0, end: 5}
+    timecode: {start: 0, end: 5},
+    playDistance: 5
 };
 var bad = {
     id: "bad",
     position: {latitude: 66.15277033, longitude: -18.90802432},
-    timecode: {start: 5, end: 10}
+    timecode: {start: 5, end: 10},
+    playDistance: 7
 };
 var hot = {
     id: "hot",
     position: {latitude: 66.15291052, longitude: -18.9076722879},
-    timecode: {start: 10, end: 15}
+    timecode: {start: 10, end: 15},
+    playDistance: 2
 };
 var cool = {
     id: "cool",
     position: {latitude: 66.152826366, longitude: -18.9080556761},
-    timecode: {start: 15, end: 20}
+    timecode: {start: 15, end: 20},
+    playDistance: 2
 };
 
 var places = [crossbow, skull, school, althyduhusid, chrysler,good, bad, hot, cool];
@@ -176,7 +180,7 @@ function positionChanged(position) {
             cool.havePlayed = true; // Added this to fix that the button
                                             // immediately showed up again
         };
-        if (distanceTo(cool.position) <  3 && cool.havePlayed == false) {
+        if (distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
             // Showing button
             $('#button').css({
                 'display': 'initial',
