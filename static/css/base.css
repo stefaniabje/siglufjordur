@@ -1,5 +1,5 @@
 html {
-    background-color: #888888;
+    background-color: #fff;
 }
 
 #viewport
@@ -28,6 +28,7 @@ html {
 }
 
 #debug {
+    display: none;
     color: black;
     background-color: transparent;
     z-index: 1000;
@@ -48,9 +49,9 @@ html {
 .place
 {
     position: absolute;
-    width: 90px;
-    height: 90px;
-    z-index: 500;
+    width: 100px;
+    height: 100px;
+    z-index: 50;
 }
 
 /*#lines

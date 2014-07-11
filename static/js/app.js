@@ -264,7 +264,7 @@ $(function () {
     });
 
     var canvas = $("#canvas")[0];
-    console.log(canvas);
+
     canvas.width = windowWidth * DEVICE_PIXEL_RADIO;
     canvas.height = windowHeight * DEVICE_PIXEL_RADIO;
 
@@ -341,39 +341,33 @@ $(function () {
     });
 });
 
+var nearestPlaceAndDistance = null;
+
 function playSoundForNearestPlace()
 {
-    var place = getNearestPlace();
+    var place = nearestPlaceAndDistance.place;
     audioPlayer.playSoundForPlace(place);
-}
-
-
-function getNearestPlace () {
-    var placesWithSounds = [good, bad, hot, cool];
-    var randomPlace = placesWithSounds[Math.floor(Math.random() * placesWithSounds.length)];
-    return randomPlace;
 }
 
 function positionChanged(position) {
     you.updatePosition(position.coords);
+
+    nearestPlaceAndDistance = findNearestPlace(you);
+
+    console.log("NearestPlace:" + nearestPlaceAndDistance.place.id);
 
     renderMap();
 }
 
 function renderMap()
 {
-    console.log("Render Map");
-
-    var $canvas = $("#canvas");
-    var context = $canvas[0].getContext("2d");
-    context.clearRect(0, 0, $canvas.width(), $canvas.height());
+    var context = setupAndClearContext();
 
     // Move all places to their place
     for (var placeIndex in places) {
         var place = places[placeIndex];
 
         place.px_position = pixelfy(you, place.position);
-        console.log(place.px_position);
 
         var $place = $("#" + place.id);
 
@@ -382,14 +376,7 @@ function renderMap()
             "top": place.px_position.y - $place.height() / 2.0
         });
 
-        context.beginPath();
-        context.moveTo(center.left * DEVICE_PIXEL_RADIO, center.top * DEVICE_PIXEL_RADIO);
-        context.lineTo(
-            (place.px_position.x + center.left) * DEVICE_PIXEL_RADIO,
-            (place.px_position.y + center.top) * DEVICE_PIXEL_RADIO
-        );
-        context.lineWidth = 2;
-        context.stroke();
+        drawLineToPlace(context, place, 4);
     }
 
     if (false)
@@ -409,6 +396,50 @@ function renderMap()
     debug.log("Lat", you.position.latitude);
     debug.log("Lon", you.position.longitude);
 }
+
+
+function setupAndClearContext()
+{
+    var $canvas = $("#canvas");
+    var context = $canvas[0].getContext("2d");
+    context.clearRect(0, 0, $canvas.width(), $canvas.height());
+
+    return context;
+}
+
+function drawLineToPlace(context, place, lineWidth)
+{
+    context.beginPath();
+    context.moveTo(center.left * DEVICE_PIXEL_RADIO, center.top * DEVICE_PIXEL_RADIO);
+    context.lineTo(
+        (place.px_position.x + center.left) * DEVICE_PIXEL_RADIO,
+        (place.px_position.y + center.top) * DEVICE_PIXEL_RADIO
+    );
+    context.lineWidth = lineWidth;
+    context.strokeStyle = "#f5f5f0";
+    context.stroke();
+}
+
+function findNearestPlace(you)
+{
+    var nearestPlace = null;
+    var distanceToNearestPlace = Infinity;
+
+    for(var placeIndex in places)
+    {
+        var place = places[placeIndex];
+
+        var distanceToPlace = distanceTo(you, place.position);
+        if(distanceToPlace < distanceToNearestPlace)
+        {
+            distanceToNearestPlace = distanceToPlace;
+            nearestPlace = place;
+        }
+    }
+
+    return {place: nearestPlace, distance: distanceToNearestPlace};
+}
+
 
 function deviceOrientationChanged(orientationEvent)
 {
@@ -436,7 +467,7 @@ function deviceOrientationChanged(orientationEvent)
 }
 
 // Calculates the distance to a place. Returns the answer in metres.
-function distanceTo(position){
+function distanceTo(you, position){
     var dx = (position.latitude - you.position.latitude) * km_per_degree.latitude;
     var dy = (position.longitude - you.position.longitude) * km_per_degree.longitude;
     dx = dx*dx;
