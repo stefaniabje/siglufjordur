@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <title>{{ title }}</title>
 
+    <link href="/static/css/reset.css" rel="stylesheet">
     <link href="/static/css/base.css" rel="stylesheet">
     <script type="text/javascript" src="/static/js/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="/static/js/app.js"></script>
@@ -17,22 +18,10 @@
       <button id="start-button">Byrja!</button>
     </div>
     <div id="viewport">
+      <canvas id="canvas"></canvas>
+      <div id='map'></div>
       <img id="you" src="/static/img/you.png" />
-      <div id='map'>
-        <!-- <img id="school"/> -->
-        <!-- <img id="althyduhusid"/> -->
-        <img id="skull"/>
-        <img id="blockage"/>
-        <img id="crossbow"/>
-        <img id="arcticstern"/>
-        <img id="onland"/>
-        <img id="hot"/>
-        <img id="cool"/>
-        <img id="good"/>
-        <img id="bad"/>
-      </div>
       <img id='button' src="/static/img/button.png" />
-
       <div id="debug">
         <div id="location">
           <label>Lat:</label>
@@ -45,7 +34,7 @@
       </div>
     </div>
     <div id="soundport">
-      <audio id="test" src="https://dl.dropboxusercontent.com/u/3075300/test.mp3"  />
+      <audio id="test" src="https://dl.dropboxusercontent.com/u/120904315/arfsogur.m4a"  />
     </div>
   </body>
 </html>

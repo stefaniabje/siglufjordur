@@ -12,13 +12,15 @@ var center = {
     top: windowHeight / 2.0
 };
 
+var DEVICE_PIXEL_RADIO = window.devicePixelRatio;
+
 var you = {
     id: "you",
     icon_path: '/static/img/you.png',
     position: null,
     _overriddenPosition: {
-        longitude: null,
-        latitude: null
+        latitude: 66.152937,
+        longitude: -18.907934
     },
 
     init: function()
@@ -254,17 +256,21 @@ $(function () {
     you.init();
     audioPlayer.init();
 
+    var $map = $("#map");
     // Top left of map is the center of the screen
-    $("#map").css({
+    $map.css({
         "left": center.left,
         "top": center.top
     });
 
-    // Shift by half size to center
-    $("#you").css({
-        "left": - $("#you").width() / 2.0,
-        "top": - $("#you").height() / 2.0
-    });
+    var canvas = $("#canvas")[0];
+
+    canvas.width = windowWidth * DEVICE_PIXEL_RADIO;
+    canvas.height = windowHeight * DEVICE_PIXEL_RADIO;
+
+    canvas.style.width = "" + windowWidth + "px";
+    canvas.style.height = "" + windowHeight + "px";
+
 
     // Initialize places
     for (var placeIndex in places) {
@@ -272,14 +278,17 @@ $(function () {
 
         place.havePlayed = false;
 
-        $("#" + place.id).attr("src", "/static/img/" + place.id + ".png");
-        $("#" + place.id).css("position", "absolute").css("width", "70px");
-        $("#" + place.id).css("transform", "translate(" + (-place.width / 2) + "px, " + (-place.height / 2) + "px)" );
+        var $place = $("<img />", {
+            "id": place.id,
+            "src": "/static/img/" + place.id + ".png",
+            "class": "place"
+        });
+
+        $map.append($place);
     }
 
     $("#viewport").height(windowHeight);
 
-    $("#you").css("position", "fixed").css("width", "70px").css("z-index", 100);
     $("#you").css("left", windowWidth / 2.0 - $("#you").width() / 2.0);
     $("#you").css("top", windowHeight / 2.0 - $("#you").height() / 2.0);
 
@@ -332,40 +341,42 @@ $(function () {
     });
 });
 
+var nearestPlaceAndDistance = null;
+
 function playSoundForNearestPlace()
 {
-    var place = getNearestPlace();
+    var place = nearestPlaceAndDistance.place;
     audioPlayer.playSoundForPlace(place);
-}
-
-
-function getNearestPlace () {
-    var placesWithSounds = [good, bad, hot, cool];
-    var randomPlace = placesWithSounds[Math.floor(Math.random() * placesWithSounds.length)];
-    return randomPlace;
 }
 
 function positionChanged(position) {
     you.updatePosition(position.coords);
+
+    nearestPlaceAndDistance = findNearestPlace(you);
+
+    console.log("NearestPlace:" + nearestPlaceAndDistance.place.id);
 
     renderMap();
 }
 
 function renderMap()
 {
-    console.log("Render Map");
+    var context = setupAndClearContext();
 
     // Move all places to their place
     for (var placeIndex in places) {
         var place = places[placeIndex];
 
-        place.pxl_position = pixelfy(you, place.position);
-        console.log(place.pxl_position);
+        place.px_position = pixelfy(you, place.position);
 
-        $("#" + place.id).css({
-            "left": place.pxl_position.x,
-            "top": place.pxl_position.y
+        var $place = $("#" + place.id);
+
+        $place.css({
+            "left": place.px_position.x - $place.width() / 2.0,
+            "top": place.px_position.y - $place.height() / 2.0
         });
+
+        drawLineToPlace(context, place, 4);
     }
 
     if (false)
@@ -384,12 +395,51 @@ function renderMap()
 
     debug.log("Lat", you.position.latitude);
     debug.log("Lon", you.position.longitude);
-
-    debug.log("Cool", distanceTo(cool.position));
-    debug.log("Hot", distanceTo(hot.position));
-    debug.log("Good", distanceTo(good.position));
-    debug.log("Bad", distanceTo(bad.position));
 }
+
+
+function setupAndClearContext()
+{
+    var $canvas = $("#canvas");
+    var context = $canvas[0].getContext("2d");
+    context.clearRect(0, 0, $canvas.width(), $canvas.height());
+
+    return context;
+}
+
+function drawLineToPlace(context, place, lineWidth)
+{
+    context.beginPath();
+    context.moveTo(center.left * DEVICE_PIXEL_RADIO, center.top * DEVICE_PIXEL_RADIO);
+    context.lineTo(
+        (place.px_position.x + center.left) * DEVICE_PIXEL_RADIO,
+        (place.px_position.y + center.top) * DEVICE_PIXEL_RADIO
+    );
+    context.lineWidth = lineWidth;
+    context.strokeStyle = "#f5f5f0";
+    context.stroke();
+}
+
+function findNearestPlace(you)
+{
+    var nearestPlace = null;
+    var distanceToNearestPlace = Infinity;
+
+    for(var placeIndex in places)
+    {
+        var place = places[placeIndex];
+
+        var distanceToPlace = distanceTo(you, place.position);
+        if(distanceToPlace < distanceToNearestPlace)
+        {
+            distanceToNearestPlace = distanceToPlace;
+            nearestPlace = place;
+        }
+    }
+
+    return {place: nearestPlace, distance: distanceToNearestPlace};
+}
+
 
 function deviceOrientationChanged(orientationEvent)
 {
@@ -402,16 +452,22 @@ function deviceOrientationChanged(orientationEvent)
         $("#map").css("transform-origin",  "" + (0) + "% " + (0) + "%");
         // Rotate map around "you"
         $("#map").css("transform", "rotate(" + (-compassDirection) + "deg)");
-        // Rotate the icons back
-        for(var place in places){
-            $("#" + places[place].id).css("transform", "rotate(" + (compassDirection) + "deg)");
+
+        $("#canvas").css({
+            "transform-origin": "50% 50%",
+            "transform": "rotate(" + (-compassDirection) + "deg)"
+        });
+
+        // // Rotate the icons back
+        for(var placeIndex in places){
+            var place = places[placeIndex];
+            $("#" + place.id).css("transform", "rotate(" + (compassDirection) + "deg)");
         }
-        //$("#you").css("transform","rotate(" + compassdirection + "deg)");
     }
 }
 
 // Calculates the distance to a place. Returns the answer in metres.
-function distanceTo(position){
+function distanceTo(you, position){
     var dx = (position.latitude - you.position.latitude) * km_per_degree.latitude;
     var dy = (position.longitude - you.position.longitude) * km_per_degree.longitude;
     dx = dx*dx;
@@ -427,8 +483,8 @@ function pixelfy(you, place_position) {
     var pxls_per_degree = {longitude: km_per_degree.longitude * scale,
         latitude: km_per_degree.latitude * scale};
     // Convert location difference GPS vector to pixel vector
-    var pxl_position = {
+    var px_position = {
         x: (place_position.longitude - you.position.longitude) * pxls_per_degree.longitude,
         y: - (place_position.latitude - you.position.latitude) * pxls_per_degree.latitude};
-    return pxl_position;
+    return px_position;
 }
