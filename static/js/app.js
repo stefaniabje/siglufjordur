@@ -1,10 +1,10 @@
-var windowWidth=window.innerWidth
-|| document.documentElement.clientWidth
-|| document.body.clientWidth;
+var windowWidth = (window.innerWidth
+    || document.documentElement.clientWidth
+    || document.body.clientWidth);
 
-var windowHeight=window.innerHeight
-|| document.documentElement.clientHeight
-|| document.body.clientHeight;
+var windowHeight = (window.innerHeight
+    || document.documentElement.clientHeight
+    || document.body.clientHeight);
 
 // Define the screen center
 var center = {
@@ -12,15 +12,74 @@ var center = {
     top: windowHeight / 2.0
 };
 
-
-// The user's coordinates and nearest place. Global for access in other functions.
-var coords;
-var nearestPlace;
-
 var you = {
     id: "you",
-    icon_path: '/static/img/you.svg'
+    icon_path: '/static/img/you.png',
+    position: null,
+    _overriddenPosition: {
+        longitude: null,
+        latitude: null
+    },
+
+    init: function()
+    {
+        this._bindDebugInputs();
+    },
+
+    _bindDebugInputs: function()
+    {
+        var self = this;
+        $("#debug #lat").change(function() {
+            var value = $(this).val();
+            if(value !== "")
+            {
+                self._overriddenPosition.latitude = parseFloat(value);
+
+                self.position.latitude = self._overriddenPosition.latitude;
+            }
+            else
+            {
+                self._overriddenPosition.latitude = null;
+            }
+
+            renderMap();
+        });
+
+        $("#debug #lon").change(function() {
+            var value = $(this).val();
+            if(value !== "")
+            {
+                self._overriddenPosition.longitude = parseFloat(value);
+
+                self.position.longitude = self._overriddenPosition.longitude;
+            }
+            else
+            {
+                self._overriddenPosition.longitude = null;
+            }
+
+            renderMap();
+        });
+    },
+
+    updatePosition: function(position)
+    {
+        this.position = {longitude: position.longitude, latitude: position.latitude};
+
+        if(this._overriddenPosition.longitude)
+        {
+            this.position.longitude = this._overriddenPosition.longitude;
+        }
+
+        if(this._overriddenPosition.latitude)
+        {
+            this.position.latitude = this._overriddenPosition.latitude;
+        }
+    }
 };
+
+var nearestPlace;
+
 
 var crossbow = {
     id: "crossbow",
@@ -167,13 +226,55 @@ var audioPlayer = {
 };
 
 
+var debug = {
+    _values: {},
+    _coords: null,
+
+    log: function(key, value)
+    {
+        this._values[key] = value;
+        this._render();
+    },
+
+    _render: function()
+    {
+        var lines = [];
+        for(var key in this._values)
+        {
+            var value = this._values[key];
+            lines.push(key + ": " + value);
+        }
+
+        $("#debug pre").text(lines.join("\n"));
+    }
+};
+
+
 $(function () {
+    you.init();
+    audioPlayer.init();
+
+    // Top left of map is the center of the screen
+    $("#map").css({
+        "left": center.left,
+        "top": center.top
+    });
+
+    // Shift by half size to center
+    $("#you").css({
+        "left": - $("#you").width() / 2.0,
+        "top": - $("#you").height() / 2.0
+    });
+
     // Initialize places
-    for (var place in places) {
-        $("#" + places[place].id).attr("src", "/static/img/" + places[place].id + ".png");
-        places[place]["havePlayed"] = false;
-        $("#" + places[place].id).css("position", "absolute").css("width", "70px");
-        $("#" + places[place].id).css("transform", "translate(" + (-places[place].width/2) + "px, " + (-places[place].height/2) + "px)" );
+    for (var placeIndex in places) {
+        var place = places[placeIndex];
+
+        place.havePlayed = false;
+
+        $("#" + place.id).attr("src", "/static/img/" + place.id + ".png");
+        $("#" + place.id).css("position", "absolute").css("width", "70px");
+        $("#" + place.id).css("transform", "translate(" + (-place.width / 2) + "px, " + (-place.height / 2) + "px)" );
     }
 
     $("#viewport").height(windowHeight);
@@ -210,8 +311,6 @@ $(function () {
 
     $("#viewport").hide();
 
-    audioPlayer.init();
-
     $("#start-button").click(function()
     {
         audioPlayer.preloadAudioSprite();
@@ -247,46 +346,29 @@ function getNearestPlace () {
 }
 
 function positionChanged(position) {
+    you.updatePosition(position.coords);
 
-    coords = position.coords;
+    renderMap();
+}
 
-    you['position'] = {latitude: coords.latitude, longitude: coords.longitude}
-
-    // Set map as parent around the places
-    $("#map").css("position", "relative");
-    // Locate upper left corner of map to center of screen
-    $("#map").css("left", center.left);
-    $("#map").css("top", center.top);
+function renderMap()
+{
+    console.log("Render Map");
 
     // Move all places to their place
-    for (var place in places) {
-        places[place]["pxl_position"] = pixelfy(places[place].position);
-        $("#" + places[place].id).css("left", places[place].pxl_position.x).css("top", places[place].pxl_position.y);
+    for (var placeIndex in places) {
+        var place = places[placeIndex];
+
+        place.pxl_position = pixelfy(you, place.position);
+        console.log(place.pxl_position);
+
+        $("#" + place.id).css({
+            "left": place.pxl_position.x,
+            "top": place.pxl_position.y
+        });
     }
 
-    $("#debug").text("Timestamp: " + position.timestamp + "\n"
-        + "Lat: " + coords.latitude + "\n"
-        + "Lon: " + coords.longitude + "\n"
-        + "Accuracy: " + coords.accuracy + "\n"
-        + "Cool: " + distanceTo(cool.position) + "\n"
-        + " Hot: " + distanceTo(hot.position) + "\n"
-        + "Good: " + distanceTo(good.position) + "\n"
-        + " Bad: " + distanceTo(bad.position) + "\n"
-    );
-//     $("#debug #window").text("Window width: " + window.innerWidth
-//         + ", window height: " + window.innerHeight
-//     );
-
-    var onClick = function() {
-
-        $('#test')[0].load(); // audio will load
-        // Hiding button
-        $('#button').css('display', 'none');
-        cool.havePlayed = true; // Added this to fix that the button
-                                // immediately showed up again
-    };
-
-    if (cool.havePlayed === false)
+    if (false)
     { // distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
         // Showing button
         $('#button').css({
@@ -295,17 +377,18 @@ function positionChanged(position) {
             "top": center.top*1.5 - $('#button').height() / 2.0
         });
 
-        // // Following button and reacting with onClick if it is clicked
-        // $("#button").bind( "click", onClick);
-        // // Jump to the right place in the audiofile.
-        // $('#test').bind('canplay', function() {
-        //     this.currentTime = cool.timecode.start;
-        // });
-        // $('#test')[0].play();
     } else {
         // Hiding button if leaving correct span
         $('#button').css('display', 'none');
     }
+
+    debug.log("Lat", you.position.latitude);
+    debug.log("Lon", you.position.longitude);
+
+    debug.log("Cool", distanceTo(cool.position));
+    debug.log("Hot", distanceTo(hot.position));
+    debug.log("Good", distanceTo(good.position));
+    debug.log("Bad", distanceTo(bad.position));
 }
 
 function deviceOrientationChanged(orientationEvent)
@@ -329,22 +412,23 @@ function deviceOrientationChanged(orientationEvent)
 
 // Calculates the distance to a place. Returns the answer in metres.
 function distanceTo(position){
-    var dx = (position.latitude - coords.latitude) * km_per_degree.latitude;
-    var dy = (position.longitude - coords.longitude) * km_per_degree.longitude;
+    var dx = (position.latitude - you.position.latitude) * km_per_degree.latitude;
+    var dy = (position.longitude - you.position.longitude) * km_per_degree.longitude;
     dx = dx*dx;
     dy = dy*dy;
     return Math.sqrt(dx+dy)*1000;
 }
 
+
 // Takes in a position in lat-long-coordinates. Returns position in pixels from user.
 // x direction is east and y direction is south.
-function pixelfy(place_position) {
+function pixelfy(you, place_position) {
     // Transform  degrees to km and scale it up
     var pxls_per_degree = {longitude: km_per_degree.longitude * scale,
         latitude: km_per_degree.latitude * scale};
     // Convert location difference GPS vector to pixel vector
     var pxl_position = {
-        x: (place_position.longitude - coords.longitude) * pxls_per_degree.longitude,
-        y: - (place_position.latitude - coords.latitude) * pxls_per_degree.latitude};
+        x: (place_position.longitude - you.position.longitude) * pxls_per_degree.longitude,
+        y: - (place_position.latitude - you.position.latitude) * pxls_per_degree.latitude};
     return pxl_position;
 }

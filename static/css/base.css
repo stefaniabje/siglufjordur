@@ -9,6 +9,18 @@ html {
     overflow: hidden;
 }
 
+#map
+{
+    position: relative;
+}
+
+#you
+{
+    position: absolute;
+    width: 20px;
+    z-index: 100;
+}
+
 #debug {
     color: gray;
     background-color: transparent;
