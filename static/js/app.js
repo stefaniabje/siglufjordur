@@ -254,16 +254,14 @@ $(function () {
     you.init();
     audioPlayer.init();
 
-    // Set map as parent around the places
+    // Top left of map is the center of the screen
     $("#map").css({
-        // Locate upper left corner of map to center of screen
         "left": center.left,
         "top": center.top
     });
 
-    // Add you to screen, set position relative to map (it's parent)
+    // Shift by half size to center
     $("#you").css({
-        // Set center of "you" circle to upper right corner of map
         "left": - $("#you").width() / 2.0,
         "top": - $("#you").height() / 2.0
     });
