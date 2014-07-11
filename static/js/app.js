@@ -12,40 +12,73 @@ var center = {
     top: windowHeight / 2.0
 };
 
-// The user's coordinates. Global for acces in other functions.
-var coords;
 
+// The user's coordinates and nearest place. Global for access in other functions.
+var coords;
+var nearestPlace;
+
+var you = {
+    id: "you",
+    icon_path: '/static/img/you.svg'
+};
 
 var crossbow = {
     id: "crossbow",
-    position: {latitude: 66.1486, longitude: -18.908227},
+    position: {latitude: 66.144336, longitude: -18.916552},
     timecode: {start: 0, end: 5},
     playDistance: 5
 };
+
 var skull = {
     id: "skull",
-    position: {latitude: 66.148903, longitude: -18.905641},
+    position: {latitude: 66.148008, longitude: -18.912512},
     timecode: {start: 0, end: 5},
     playDistance: 5
 };
-var school = {
-    id: "school",
-    position: {latitude: 66.153109, longitude: -18.911886},
+
+var arcticstern = {
+    id: "arcticstern",
+    position: {latitude: 66.135502, longitude: -18.921606},
     timecode: {start: 0, end: 5},
     playDistance: 5
 };
-var althyduhusid = {
-    id: "althyduhusid",
-    position: {latitude: 66.152959, longitude: -18.907817},
+
+var blockage = {
+    id: "blockage",
+    position: {latitude: 66.145453, longitude: -18.913870},
     timecode: {start: 0, end: 5},
     playDistance: 5
 };
-var chrysler = {
-    id: "chrysler",
-    position: {latitude: 66.152836, longitude: -18.910131},
+
+var onland = {
+    id: "onland",
+    position: {latitude: 66.154025, longitude: -18.904471},
     timecode: {start: 0, end: 5},
     playDistance: 5
 };
+
+var hvanneyrarskal = {
+    id: "hvanneyrarskal",
+    position: {latitude: 66.158233, longitude: -18.917498},
+    timecode: {start: 0, end: 5},
+    playDistance: 5
+};
+
+var raudka = {
+    id: "raudka",
+    position: {latitude: 66.149680, longitude: -18.905918},
+    timecode: {start: 0, end: 5},
+    playDistance: 5
+};
+
+var skramuhyrna = {
+    id: "skramuhyrna",
+    position: {latitude: 66.181559, longitude: -18.923616},
+    timecode: {start: 0, end: 5},
+    playDistance: 5
+};
+
+
 var good = {
     id: "good",
     position: {latitude: 66.1529322714, longitude: -18.9079409},
@@ -71,10 +104,14 @@ var cool = {
     playDistance: 20
 };
 
-var places = [crossbow, skull, school, althyduhusid, chrysler, good, bad, hot, cool];
+// var places = [crossbow, skull, arcticstern, blockage, onland, good, bad, hot, cool];
+var places = [crossbow, skull, arcticstern, blockage, onland,
+    hvanneyrarskal, raudka, skramuhyrna];
 
 // pixels per km
-var scale = 8000.0;
+// TODO convert scale to be relative to pixels per screen!
+var scale = 200.0;
+
 // Depending on globe location, there is a certain scale between
 // degrees and kilometers, not identical for longitude and latitude.
 // In Siglufjörður it is the following:
@@ -135,11 +172,16 @@ $(function () {
     for (var place in places) {
         $("#" + places[place].id).attr("src", "/static/img/" + places[place].id + ".png");
         places[place]["havePlayed"] = false;
-        $("#" + places[place].id).css("position", "absolute").css("width", "60px");
+        $("#" + places[place].id).css("position", "absolute").css("width", "70px");
         $("#" + places[place].id).css("transform", "translate(" + (-places[place].width/2) + "px, " + (-places[place].height/2) + "px)" );
     }
 
     $("#viewport").height(windowHeight);
+
+    $("#you").css("position", "fixed").css("width", "70px").css("z-index", 100);
+    $("#you").css("left", windowWidth / 2.0 - $("#you").width() / 2.0);
+    $("#you").css("top", windowHeight / 2.0 - $("#you").height() / 2.0);
+
 
     // If we access the user's geolocation:
     if (navigator.geolocation) {
@@ -150,7 +192,7 @@ $(function () {
         alert("No GPS!");
     }
 
-    // If the user'device s has orientation (LG7II does not have it for example)
+    // If the user's device has orientation (LG7II does not have it for example)
     if (window.DeviceOrientationEvent) {
         // Follow the orientation changes as events
         window.addEventListener('deviceorientation', deviceOrientationChanged, false);
@@ -208,23 +250,13 @@ function positionChanged(position) {
 
     coords = position.coords;
 
-    var you = {
-        id: "you",
-        icon_path: '/static/img/you.svg',
-        position: {latitude: coords.latitude, longitude: coords.longitude}
-    };
+    you['position'] = {latitude: coords.latitude, longitude: coords.longitude}
 
     // Set map as parent around the places
     $("#map").css("position", "relative");
     // Locate upper left corner of map to center of screen
     $("#map").css("left", center.left);
     $("#map").css("top", center.top);
-
-    // Add you to screen, set position relative to map (it's parent)
-    $("#you").css("position", "absolute").css("width", "20px").css("z-index", 100);
-    // Set center of "you" circle to upper right corner of map
-    $("#you").css("left", - $("#you").width() / 2.0);
-    $("#you").css("top", - $("#you").height() / 2.0);
 
     // Move all places to their place
     for (var place in places) {

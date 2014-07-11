@@ -1,8 +1,6 @@
 siglufjordur
 ============
 
-HERE IS A CHANGE TO SHOW HOW PULL REQUESTS WORK. WE WILL REVERT THIS CHANGE.
-
 This is a web application that enables story telling of locals through treasure hunting around Siglufjörður.
 
 
