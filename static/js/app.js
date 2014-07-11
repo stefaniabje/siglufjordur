@@ -130,6 +130,29 @@ var audioPlayer = {
 };
 
 
+var debug = {
+    _values = {},
+
+    log: function(key, value)
+    {
+        this._values[key] = value;
+        this._render();
+    },
+
+    _render: function()
+    {
+        var lines = [];
+        for(var key in this._values)
+        {
+            var value = self._values[key];
+            lines.push(value + ": " + value);
+        }
+
+        $("#debug").text(lines.join("\n"));
+    }
+};
+
+
 $(function () {
     // Initialize places
     for (var place in places) {
@@ -232,27 +255,14 @@ function positionChanged(position) {
         $("#" + places[place].id).css("left", places[place].pxl_position.x).css("top", places[place].pxl_position.y);
     }
 
-    $("#debug").text("Timestamp: " + position.timestamp + "\n"
-        + "Lat: " + coords.latitude + "\n"
-        + "Lon: " + coords.longitude + "\n"
-        + "Accuracy: " + coords.accuracy + "\n"
-        + "Cool: " + distanceTo(cool.position) + "\n"
-        + " Hot: " + distanceTo(hot.position) + "\n"
-        + "Good: " + distanceTo(good.position) + "\n"
-        + " Bad: " + distanceTo(bad.position) + "\n"
-    );
-//     $("#debug #window").text("Window width: " + window.innerWidth
-//         + ", window height: " + window.innerHeight
-//     );
-
-    var onClick = function() {
-
-        $('#test')[0].load(); // audio will load
-        // Hiding button
-        $('#button').css('display', 'none');
-        cool.havePlayed = true; // Added this to fix that the button
-                                // immediately showed up again
-    };
+    debug.log("Timestamp", position.timestamp);
+    debug.log("Lat", coords.latitude);
+    debug.log("Lon", coords.longitude);
+    debug.log("Accuracy", coords.accuracy);
+    debug.log("Cool", distanceTo(cool.position));
+    debug.log("Hot", distanceTo(hot.position));
+    debug.log("Good", distanceTo(good.position));
+    debug.log("Bad", distanceTo(bad.position));
 
     if (cool.havePlayed === false)
     { // distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
@@ -263,13 +273,6 @@ function positionChanged(position) {
             "top": center.top*1.5 - $('#button').height() / 2.0
         });
 
-        // // Following button and reacting with onClick if it is clicked
-        // $("#button").bind( "click", onClick);
-        // // Jump to the right place in the audiofile.
-        // $('#test').bind('canplay', function() {
-        //     this.currentTime = cool.timecode.start;
-        // });
-        // $('#test')[0].play();
     } else {
         // Hiding button if leaving correct span
         $('#button').css('display', 'none');
@@ -303,6 +306,7 @@ function distanceTo(position){
     dy = dy*dy;
     return Math.sqrt(dx+dy)*1000;
 }
+
 
 // Takes in a position in lat-long-coordinates. Returns position in pixels from user.
 // x direction is east and y direction is south.
