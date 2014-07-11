@@ -1,10 +1,10 @@
-var windowWidth=window.innerWidth
-|| document.documentElement.clientWidth
-|| document.body.clientWidth;
+var windowWidth = (window.innerWidth
+    || document.documentElement.clientWidth
+    || document.body.clientWidth);
 
-var windowHeight=window.innerHeight
-|| document.documentElement.clientHeight
-|| document.body.clientHeight;
+var windowHeight = (window.innerHeight
+    || document.documentElement.clientHeight
+    || document.body.clientHeight);
 
 // Define the screen center
 var center = {
@@ -12,8 +12,71 @@ var center = {
     top: windowHeight / 2.0
 };
 
-// The user's coordinates. Global for acces in other functions.
-var coords;
+var you = {
+    id: "you",
+    icon_path: '/static/img/you.svg',
+    position: null,
+    _overriddenPosition: {
+        longitude: null,
+        latitude: null
+    },
+
+    init: function()
+    {
+        this._bindDebugInputs();
+    },
+
+    _bindDebugInputs: function()
+    {
+        var self = this;
+        $("#debug #lat").change(function() {
+            var value = $(this).val();
+            if(value !== "")
+            {
+                self._overriddenPosition.latitude = parseFloat(value);
+
+                self.position.latitude = self._overriddenPosition.latitude;
+            }
+            else
+            {
+                self._overriddenPosition.latitude = null;
+            }
+
+            renderMap();
+        });
+
+        $("#debug #lon").change(function() {
+            var value = $(this).val();
+            if(value !== "")
+            {
+                self._overriddenPosition.longitude = parseFloat(value);
+
+                self.position.longitude = self._overriddenPosition.longitude;
+            }
+            else
+            {
+                self._overriddenPosition.longitude = null;
+            }
+
+            renderMap();
+        });
+    },
+
+    updatePosition: function(position)
+    {
+        this.position = {longitude: position.longitude, latitude: position.latitude};
+
+        if(this._overriddenPosition.longitude)
+        {
+            this.position.longitude = this._overriddenPosition.longitude;
+        }
+
+        if(this._overriddenPosition.latitude)
+        {
+            this.position.latitude = this._overriddenPosition.latitude;
+        }
+    }
+};
 
 
 var crossbow = {
@@ -131,7 +194,8 @@ var audioPlayer = {
 
 
 var debug = {
-    _values = {},
+    _values: {},
+    _coords: null,
 
     log: function(key, value)
     {
@@ -144,22 +208,42 @@ var debug = {
         var lines = [];
         for(var key in this._values)
         {
-            var value = self._values[key];
-            lines.push(value + ": " + value);
+            var value = this._values[key];
+            lines.push(key + ": " + value);
         }
 
-        $("#debug").text(lines.join("\n"));
+        $("#debug pre").text(lines.join("\n"));
     }
 };
 
 
 $(function () {
+    you.init();
+    audioPlayer.init();
+
+    // Set map as parent around the places
+    $("#map").css({
+        // Locate upper left corner of map to center of screen
+        "left": center.left,
+        "top": center.top
+    });
+
+    // Add you to screen, set position relative to map (it's parent)
+    $("#you").css({
+        // Set center of "you" circle to upper right corner of map
+        "left": - $("#you").width() / 2.0,
+        "top": - $("#you").height() / 2.0
+    });
+
     // Initialize places
-    for (var place in places) {
-        $("#" + places[place].id).attr("src", "/static/img/" + places[place].id + ".png");
-        places[place]["havePlayed"] = false;
-        $("#" + places[place].id).css("position", "absolute").css("width", "60px");
-        $("#" + places[place].id).css("transform", "translate(" + (-places[place].width/2) + "px, " + (-places[place].height/2) + "px)" );
+    for (var placeIndex in places) {
+        var place = places[placeIndex];
+
+        place.havePlayed = false;
+
+        $("#" + place.id).attr("src", "/static/img/" + place.id + ".png");
+        $("#" + place.id).css("position", "absolute").css("width", "60px");
+        $("#" + place.id).css("transform", "translate(" + (-place.width / 2) + "px, " + (-place.height / 2) + "px)" );
     }
 
     $("#viewport").height(windowHeight);
@@ -190,8 +274,6 @@ $(function () {
     $("#button").hide();
 
     $("#viewport").hide();
-
-    audioPlayer.init();
 
     $("#start-button").click(function()
     {
@@ -228,43 +310,29 @@ function getNearestPlace () {
 }
 
 function positionChanged(position) {
+    you.updatePosition(position.coords);
 
-    coords = position.coords;
+    renderMap();
+}
 
-    var you = {
-        id: "you",
-        icon_path: '/static/img/you.svg',
-        position: {latitude: coords.latitude, longitude: coords.longitude}
-    };
-
-    // Set map as parent around the places
-    $("#map").css("position", "relative");
-    // Locate upper left corner of map to center of screen
-    $("#map").css("left", center.left);
-    $("#map").css("top", center.top);
-
-    // Add you to screen, set position relative to map (it's parent)
-    $("#you").css("position", "absolute").css("width", "20px").css("z-index", 100);
-    // Set center of "you" circle to upper right corner of map
-    $("#you").css("left", - $("#you").width() / 2.0);
-    $("#you").css("top", - $("#you").height() / 2.0);
+function renderMap()
+{
+    console.log("Render Map");
 
     // Move all places to their place
-    for (var place in places) {
-        places[place]["pxl_position"] = pixelfy(places[place].position);
-        $("#" + places[place].id).css("left", places[place].pxl_position.x).css("top", places[place].pxl_position.y);
+    for (var placeIndex in places) {
+        var place = places[placeIndex];
+
+        place.pxl_position = pixelfy(you, place.position);
+        console.log(place.pxl_position);
+
+        $("#" + place.id).css({
+            "left": place.pxl_position.x,
+            "top": place.pxl_position.y
+        });
     }
 
-    debug.log("Timestamp", position.timestamp);
-    debug.log("Lat", coords.latitude);
-    debug.log("Lon", coords.longitude);
-    debug.log("Accuracy", coords.accuracy);
-    debug.log("Cool", distanceTo(cool.position));
-    debug.log("Hot", distanceTo(hot.position));
-    debug.log("Good", distanceTo(good.position));
-    debug.log("Bad", distanceTo(bad.position));
-
-    if (cool.havePlayed === false)
+    if (false)
     { // distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
         // Showing button
         $('#button').css({
@@ -277,6 +345,14 @@ function positionChanged(position) {
         // Hiding button if leaving correct span
         $('#button').css('display', 'none');
     }
+
+    debug.log("Lat", you.position.latitude);
+    debug.log("Lon", you.position.longitude);
+
+    debug.log("Cool", distanceTo(cool.position));
+    debug.log("Hot", distanceTo(hot.position));
+    debug.log("Good", distanceTo(good.position));
+    debug.log("Bad", distanceTo(bad.position));
 }
 
 function deviceOrientationChanged(orientationEvent)
@@ -300,8 +376,8 @@ function deviceOrientationChanged(orientationEvent)
 
 // Calculates the distance to a place. Returns the answer in metres.
 function distanceTo(position){
-    var dx = (position.latitude - coords.latitude) * km_per_degree.latitude;
-    var dy = (position.longitude - coords.longitude) * km_per_degree.longitude;
+    var dx = (position.latitude - you.position.latitude) * km_per_degree.latitude;
+    var dy = (position.longitude - you.position.longitude) * km_per_degree.longitude;
     dx = dx*dx;
     dy = dy*dy;
     return Math.sqrt(dx+dy)*1000;
@@ -310,13 +386,13 @@ function distanceTo(position){
 
 // Takes in a position in lat-long-coordinates. Returns position in pixels from user.
 // x direction is east and y direction is south.
-function pixelfy(place_position) {
+function pixelfy(you, place_position) {
     // Transform  degrees to km and scale it up
     var pxls_per_degree = {longitude: km_per_degree.longitude * scale,
         latitude: km_per_degree.latitude * scale};
     // Convert location difference GPS vector to pixel vector
     var pxl_position = {
-        x: (place_position.longitude - coords.longitude) * pxls_per_degree.longitude,
-        y: - (place_position.latitude - coords.latitude) * pxls_per_degree.latitude};
+        x: (place_position.longitude - you.position.longitude) * pxls_per_degree.longitude,
+        y: - (place_position.latitude - you.position.latitude) * pxls_per_degree.latitude};
     return pxl_position;
 }
