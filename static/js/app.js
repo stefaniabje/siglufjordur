@@ -19,10 +19,10 @@ var you = {
     icon_path: '/static/img/you.png',
     position: null,
     _overriddenPosition: {
-        // latitude: null,
-        // longitude: null
-        latitude: 66.152937,
-        longitude: -18.907934
+        latitude: null,
+        longitude: null
+        // latitude: 66.152937,
+        // longitude: -18.907934
     },
 
     init: function()
@@ -168,6 +168,7 @@ var onland = {
 
 // var onland = {
 //     id: "onland",
+//     title: "Á landi",
 //     position: {latitude: 66.152902, longitude: -18.908108},
 //     timecode: {start: 20*60+4, end: 25*60+13},
 //     playDistance: 20
@@ -188,7 +189,7 @@ for(var placeIndex in places)
 
 // pixels per km
 // TODO convert scale to be relative to pixels per screen!
-var scale = 200.0;
+var scale = 700.0;
 
 // Depending on globe location, there is a certain scale between
 // degrees and kilometers, not identical for longitude and latitude.
@@ -559,7 +560,7 @@ function renderMap()
     debug.log('Latitude:', you.position.latitude);
     debug.log('Longitude:', you.position.longitude);
 
-    if (nearestPlaceAndDistance.distance < 200)
+    if (nearestPlaceAndDistance.distance < 50)
     {
         $("#you").hide(); // TODO: SKítamix
         $("#story-found").show();
