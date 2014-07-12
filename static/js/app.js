@@ -19,10 +19,8 @@ var you = {
     icon_path: '/static/img/you.png',
     position: null,
     _overriddenPosition: {
-        latitude: null,
-        longitude: null
-        // latitude: 66.152937,
-        // longitude: -18.907934
+        latitude: null, longitude: null
+        // latitude: 66.152937, longitude: -18.907934
     },
 
     init: function()
@@ -88,7 +86,7 @@ var nearestPlace;
 var catalina = {
     id: "catalina",
     title: "Catalina",
-    position: {latitude: 66.145453, longitude: -18.913870},
+    position: {latitude: 66.147946, longitude: -18.902645},
     timecode: {start: 0, end: 1*60+12},
     playDistance: 60
 };
@@ -98,7 +96,7 @@ var blockage = {
     title: "Stíflan",
     position: {latitude: 66.145453, longitude: -18.913870},
     timecode: {start: 1*60+13, end: 3*60+41},
-    playDistance: 5
+    playDistance: 50
 };
 
 var skramuhyrna = {
@@ -106,7 +104,7 @@ var skramuhyrna = {
     title: "Skrámuhyrna",
     position: {latitude: 66.181559, longitude: -18.923616},
     timecode: {start: 3*60+42, end: 6*60+30},
-    playDistance: 5
+    playDistance: 700
 };
 
 var arcticstern = {
@@ -114,7 +112,7 @@ var arcticstern = {
     title: "Kríuvarpið",
     position: {latitude: 66.135502, longitude: -18.921606},
     timecode: {start: 6*60+30, end: 8*60+45},
-    playDistance: 5
+    playDistance: 50
 };
 
 var skull = {
@@ -122,15 +120,15 @@ var skull = {
     title: "Hauskúpan",
     position: {latitude: 66.148008, longitude: -18.912512},
     timecode: {start: 8*60+46, end: 10*60+49},
-    playDistance: 5
+    playDistance: 50
 };
 
 var betweenshipandshore = {
     id: "betweenshipandshore",
     title: "Á milli skips og bryggju",
-    position: {latitude: 66.147946, longitude: -18.902645},
+    position: {latitude: 66.145453, longitude: -18.913870},
     timecode: {start: 10*60+50, end: 13*60+56},
-    playDistance: 5
+    playDistance: 50
 };
 
 var crossbow = {
@@ -138,7 +136,7 @@ var crossbow = {
     title: "Lásboginn",
     position: {latitude: 66.144336, longitude: -18.916552},
     timecode: {start: 13*60+57, end: 15*60+32},
-    playDistance: 5
+    playDistance: 100
 };
 
 var hvanneyrarskal = {
@@ -146,7 +144,7 @@ var hvanneyrarskal = {
     title: "Hvanneyrarskál",
     position: {latitude: 66.158233, longitude: -18.917498},
     timecode: {start: 15*60+33, end: 17*60+46},
-    playDistance: 5
+    playDistance: 500
 };
 
 var raudka = {
@@ -154,7 +152,7 @@ var raudka = {
     title: "Rauðka",
     position: {latitude: 66.149680, longitude: -18.905918},
     timecode: {start: 17*60+47, end: 20*60+4},
-    playDistance: 5
+    playDistance: 40
 };
 
 var onland = {
@@ -162,16 +160,17 @@ var onland = {
     title: "Á landi",
     position: {latitude: 66.154025, longitude: -18.904471},
     timecode: {start: 20*60+4, end: 25*60+13},
-    playDistance: 5
+    playDistance: 50
 };
 
 
 // var onland = {
+//     // DEBUG
 //     id: "onland",
 //     title: "Á landi",
 //     position: {latitude: 66.152902, longitude: -18.908108},
-//     timecode: {start: 20*60+4, end: 25*60+13},
-//     playDistance: 20
+//     timecode: {start: 20*60+4, end: 20 * 60 + 10}, //25*60+13},
+//     playDistance: 50
 // };
 
 
@@ -209,6 +208,7 @@ var audioPlayer = {
 
         $("#test").bind("canplaythrough", function()
         {
+            console.log("canplaythrough - has preloaded audio sprite");
             self.hasPreloadedAudioSprite = true;
 
             if(self._preloadOnCompletionCallback)
@@ -237,6 +237,12 @@ var audioPlayer = {
             if(self._player.currentTime >= self._nowPlayingPlace.timecode.end)
             {
                 self._player.pause();
+
+                // TODO: Hack! Shouldn't be here, too much coupling with the audio player.
+                $("#story-found").hide();
+                $("#you").show();
+
+                self._nowPlayingPlace.hasPlayed = true;
                 self._nowPlayingPlace = null;
             }
         });
@@ -246,6 +252,8 @@ var audioPlayer = {
     hasPreloadedAudioSprite: false,
     preloadAudioSprite: function(onCompletionCallback)
     {
+        console.log("preloading audio sprite");
+
         // This is a hack to preload the whole audio file without actually playing
         // a sound. Must be initalized from a touch event context on mobile.
         this._player.play();
@@ -317,13 +325,16 @@ var loadingScene = {
         transitionCallback();
         if(audioPlayer.hasPreloadedAudioSprite === false)
         {
+            console.log("has not preloaded audio sprite");
             audioPlayer.preloadAudioSprite(function()
             {
+                console.log("preloaded audio sprite");
                 router.switchToScene(data);
             });
         }
         else
         {
+            console.log("has preloaded audio sprite");
             router.switchToScene(data);
         }
     }
@@ -345,13 +356,17 @@ var mapScene = {
         this._initMap();
 
         $("#story-found").hide()
+        $(".play-nearest-story").show();
+        $(".stop-nearest-story").hide();
+
         $("#story-found .play-nearest-story").click(function(event)
         {
             event.preventDefault();
 
             playSoundForNearestPlace(); // TODO: If implementing pause, then must check for resume
 
-            $(this).attr("class", "stop-nearest-story");
+            $(".play-nearest-story").hide();
+            $(".stop-nearest-story").show();
         });
 
         $("#story-found .stop-nearest-story").click(function(event)
@@ -360,7 +375,22 @@ var mapScene = {
 
             audioPlayer.pause();
 
-            $(this).attr("class", "play-nearest-story");
+            $("#story-found").hide();
+            $("#you").show();
+
+            $(".play-nearest-story").show();
+            $(".stop-nearest-story").hide();
+        });
+
+        $("#story-found .close-nearest-story").click(function(event)
+        {
+            event.preventDefault();
+
+            $("#story-found").hide();
+            $("#you").show();
+
+            audioPlayer.pause();
+            nearestPlaceAndDistance.place.hasPlayed = true;
         });
 
         transitionCallback();
@@ -402,7 +432,7 @@ var mapScene = {
         for (var placeIndex in places) {
             var place = places[placeIndex];
 
-            place.havePlayed = false;
+            place.hasPlayed = false;
 
             var $place = $("<img />", {
                 "id": place.id,
@@ -560,18 +590,22 @@ function renderMap()
     debug.log('Latitude:', you.position.latitude);
     debug.log('Longitude:', you.position.longitude);
 
-    if (nearestPlaceAndDistance.distance < 50)
+    var nearestPlace = nearestPlaceAndDistance.place;
+    if (nearestPlace.hasPlayed == false && nearestPlaceAndDistance.distance < nearestPlace.playDistance)
     {
         $("#you").hide(); // TODO: SKítamix
         $("#story-found").show();
-        $("#story-found img").attr("src", "/static/img/places/with-name/" + place.id + ".png")
-    }  // else {
-    //     // Hiding button if leaving correct span
-    //     $('#button').hide();
-    // }
+        $("#story-found img").attr("src", "/static/img/places/big-with-name/" + nearestPlace.id + ".png")
+    }
 
-    // debug.log("Lat", you.position.latitude);
-    // debug.log("Lon", you.position.longitude);
+    for (var placeIndex in places) {
+        var place = places[placeIndex];
+
+        if(place.hasPlayed === true && distanceTo(you, place) >= (place.playDistance + 10))
+        {
+            place.hasPlayed = false;
+        }
+    }
 }
 
 
@@ -579,7 +613,7 @@ function setupAndClearContext()
 {
     var $canvas = $("#canvas");
     var context = $canvas[0].getContext("2d");
-    context.clearRect(0, 0, $canvas.width(), $canvas.height());
+    context.clearRect(0, 0, windowWidth * DEVICE_PIXEL_RADIO, windowHeight * DEVICE_PIXEL_RADIO);
 
     return context;
 }
