@@ -19,8 +19,10 @@ var you = {
     icon_path: '/static/img/you.png',
     position: null,
     _overriddenPosition: {
-        latitude: 66.152937,
-        longitude: -18.907934
+        latitude: null,
+        longitude: null
+        // latitude: 66.152937,
+        // longitude: -18.907934
     },
 
     init: function()
@@ -83,95 +85,84 @@ var you = {
 var nearestPlace;
 
 
-var crossbow = {
-    id: "crossbow",
-    position: {latitude: 66.144336, longitude: -18.916552},
-    timecode: {start: 0, end: 5},
-    playDistance: 5
-};
-
-var skull = {
-    id: "skull",
-    position: {latitude: 66.148008, longitude: -18.912512},
-    timecode: {start: 0, end: 5},
-    playDistance: 5
-};
-
-var arcticstern = {
-    id: "arcticstern",
-    position: {latitude: 66.135502, longitude: -18.921606},
-    timecode: {start: 0, end: 5},
-    playDistance: 5
+var catalina = {
+    id: "catalina",
+    position: {latitude: 66.145453, longitude: -18.913870},
+    timecode: {start: 0, end: 1*60+12},
+    playDistance: 60
 };
 
 var blockage = {
     id: "blockage",
     position: {latitude: 66.145453, longitude: -18.913870},
-    timecode: {start: 0, end: 5},
-    playDistance: 5
-};
-
-var onland = {
-    id: "onland",
-    position: {latitude: 66.154025, longitude: -18.904471},
-    timecode: {start: 0, end: 5},
-    playDistance: 5
-};
-
-var hvanneyrarskal = {
-    id: "hvanneyrarskal",
-    position: {latitude: 66.158233, longitude: -18.917498},
-    timecode: {start: 0, end: 5},
-    playDistance: 5
-};
-
-var raudka = {
-    id: "raudka",
-    position: {latitude: 66.149680, longitude: -18.905918},
-    timecode: {start: 0, end: 5},
+    timecode: {start: 1*60+13, end: 3*60+41},
     playDistance: 5
 };
 
 var skramuhyrna = {
     id: "skramuhyrna",
     position: {latitude: 66.181559, longitude: -18.923616},
-    timecode: {start: 0, end: 5},
+    timecode: {start: 3*60+42, end: 6*60+30},
+    playDistance: 5
+};
+
+var arcticstern = {
+    id: "arcticstern",
+    position: {latitude: 66.135502, longitude: -18.921606},
+    timecode: {start: 6*60+30, end: 8*60+45},
+    playDistance: 5
+};
+
+var skull = {
+    id: "skull",
+    position: {latitude: 66.148008, longitude: -18.912512},
+    timecode: {start: 8*60+46, end: 10*60+49},
+    playDistance: 5
+};
+
+var betweenshipandshore = {
+    id: "betweenshipandshore",
+    position: {latitude: 66.147946, longitude: -18.902645},
+    timecode: {start: 10*60+50, end: 13*60+56},
+    playDistance: 5
+};
+
+var crossbow = {
+    id: "crossbow",
+    position: {latitude: 66.144336, longitude: -18.916552},
+    timecode: {start: 13*60+57, end: 15*60+32},
+    playDistance: 5
+};
+
+var hvanneyrarskal = {
+    id: "hvanneyrarskal",
+    position: {latitude: 66.158233, longitude: -18.917498},
+    timecode: {start: 15*60+33, end: 17*60+46},
+    playDistance: 5
+};
+
+var raudka = {
+    id: "raudka",
+    position: {latitude: 66.149680, longitude: -18.905918},
+    timecode: {start: 17*60+47, end: 20*60+4},
+    playDistance: 5
+};
+
+var onland = {
+    id: "onland",
+    position: {latitude: 66.154025, longitude: -18.904471},
+    timecode: {start: 20*60+4, end: 25*60+13},
     playDistance: 5
 };
 
 
-var good = {
-    id: "good",
-    position: {latitude: 66.1529322714, longitude: -18.9079409},
-    timecode: {start: 0, end: 5},
-    playDistance: 5
-};
-var bad = {
-    id: "bad",
-    position: {latitude: 66.15277033, longitude: -18.90802432},
-    timecode: {start: 5, end: 10},
-    playDistance: 7
-};
-var hot = {
-    id: "hot",
-    position: {latitude: 66.15291052, longitude: -18.9076722879},
-    timecode: {start: 10, end: 15},
-    playDistance: 2
-};
-var cool = {
-    id: "cool",
-    position: {latitude: 66.152826366, longitude: -18.9080556761},
-    timecode: {start: 15, end: 20},
-    playDistance: 20
-};
-
-// var places = [crossbow, skull, arcticstern, blockage, onland, good, bad, hot, cool];
-var places = [crossbow, skull, arcticstern, blockage, onland,
-    hvanneyrarskal, raudka, skramuhyrna];
+var places = [catalina, blockage, skramuhyrna, arcticstern,
+    skull, betweenshipandshore, crossbow, hvanneyrarskal,
+    raudka, onland];
 
 // pixels per km
 // TODO convert scale to be relative to pixels per screen!
-var scale = 200.0;
+var scale = 2000.0;
 
 // Depending on globe location, there is a certain scale between
 // degrees and kilometers, not identical for longitude and latitude.
@@ -379,7 +370,7 @@ function renderMap()
         drawLineToPlace(context, place, 4);
     }
 
-    if (false)
+    if (nearestPlaceAndDistance.distance < 20)
     { // distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
         // Showing button
         $('#button').css({
