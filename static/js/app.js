@@ -259,6 +259,11 @@ var audioPlayer = {
         this._player.play();
 
         this._nowPlayingPlace = place;
+    },
+
+    pause: function()
+    {
+        this._player.pause();
     }
 };
 
@@ -338,13 +343,24 @@ var mapScene = {
 
         this._initMap();
 
-        $("#story #storyfound").hide()
-        $("#story #playstoryfound").click(function()
+        $("#story-found").hide()
+        $("#story-found .play-nearest-story").click(function(event)
         {
-            playSoundForNearestPlace();
+            event.preventDefault();
+
+            playSoundForNearestPlace(); // TODO: If implementing pause, then must check for resume
+
+            $(this).attr("class", "pause-nearest-story");
         });
 
-        $("#story #playstoryfound").hide();
+        $("#story-found .pause-nearest-story").click(function(event)
+        {
+            event.preventDefault();
+
+            audioPlayer.pause();
+
+            $(this).attr("class", "play-nearest-story");
+        });
 
         transitionCallback();
     },
@@ -537,18 +553,17 @@ function renderMap()
 
         drawLineToPlace(context, place, 4);
     }
+
     debug.log('NearestPlaceDistance', nearestPlaceAndDistance.distance);
     debug.log('NearestPlace', nearestPlaceAndDistance.place.id);
     debug.log('Latitude:', you.position.latitude);
     debug.log('Longitude:', you.position.longitude);
+
     if (nearestPlaceAndDistance.distance < 200)
     {
-        // alert('REACHED PLACE!');
-        // playSoundForNearestPlace();
-
-        $("#story #storyfound").show();
-        $("#story #playstoryfound").show();
-        // debug.log("Button", $("#button"))
+        $("#you").hide(); // TODO: SKítamix
+        $("#story-found").show();
+        $("#story-found img").attr("src", "/static/img/places/with-name/" + place.id + ".png")
     }  // else {
     //     // Hiding button if leaving correct span
     //     $('#button').hide();

@@ -209,41 +209,71 @@ html {
     z-index: 100;
 }
 
-#story
+#story-found
 {
     position: relative;
-}
 
-#storyfound
-{
-    position: relative;
+    display: none;
+
     background-image: url(/static/img/storyfound.png);
     background-size: 320px 480px;
     width: 320px;
     height: 480px;
-    top: 50px;
-    left: 10px;
 
     margin-left:auto;
     margin-right:auto;
 }
 
-#playstoryfound
+#story-found img
 {
+    position: absolute;
+
+    width: 250px;
+    height: 250px;
+
+    margin-right: auto;
+
+    border: 1px solid black;
+
+    left: 35px;
+    bottom: 100px;
+}
+
+.play-nearest-story
+{
+    position: absolute;
+
     background-image: url(/static/img/playstoryfound.png);
-    background-size: 320px 480px;
+    background-size: 320px 60px;
 
     width: 320px;
     height: 60px;
+
+    display: block;
+
+    text-indent: -10000000px;
+
+    bottom: 60px;
 }
 
-#playstoryfound
+.pause-nearest-story
 {
+    position: absolute;
+
     background-image: url(/static/img/pausestoryfound.png);
-    background-size: 320px 480px;
+    background-size: 320px 98px;
+
     width: 320px;
-    height: 60px;
+    height: 98px;
+
+    display: block;
+
+    text-indent: -10000000px;
+
+    bottom: 60px;
 }
+
+
 
 #debug {
     display: none;
