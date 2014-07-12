@@ -19,10 +19,10 @@ var you = {
     icon_path: '/static/img/you.png',
     position: null,
     _overriddenPosition: {
-        latitude: null,
-        longitude: null
-        // latitude: 66.152937,
-        // longitude: -18.907934
+        // latitude: null,
+        // longitude: null
+        latitude: 66.152937,
+        longitude: -18.907934
     },
 
     init: function()
@@ -156,13 +156,21 @@ var onland = {
 };
 
 
+// var onland = {
+//     id: "onland",
+//     position: {latitude: 66.152902, longitude: -18.908108},
+//     timecode: {start: 20*60+4, end: 25*60+13},
+//     playDistance: 20
+// };
+
+
 var places = [catalina, blockage, skramuhyrna, arcticstern,
     skull, betweenshipandshore, crossbow, hvanneyrarskal,
     raudka, onland];
 
 // pixels per km
 // TODO convert scale to be relative to pixels per screen!
-var scale = 2000.0;
+var scale = 200.0;
 
 // Depending on globe location, there is a certain scale between
 // degrees and kilometers, not identical for longitude and latitude.
@@ -312,12 +320,13 @@ var mapScene = {
 
         this._initMap();
 
-        $("#button").css({
-           'position': 'relative',
-           width: '100px',
-           'z-index': '500'
+        $("#story #storyfound").hide()
+        $("#story #playstoryfound").click(function()
+        {
+            playSoundForNearestPlace();
         });
-        $("#button").hide();
+
+        $("#story #playstoryfound").hide();
 
         transitionCallback();
     },
@@ -430,7 +439,9 @@ function positionChanged(position) {
 
     nearestPlaceAndDistance = findNearestPlace(you);
 
-    console.log("NearestPlace: " + nearestPlaceAndDistance.place.id);
+    // console.log("NearestPlace: ", nearestPlaceAndDistance.place);
+    // console.log("NearestPlaceDistance: ", nearestPlaceAndDistance.distance);
+    // debug.log("NearestPlace: ", nearestPlaceAndDistance.place)
 
     renderMap();
 }
@@ -454,23 +465,25 @@ function renderMap()
 
         drawLineToPlace(context, place, 4);
     }
+    debug.log('NearestPlaceDistance', nearestPlaceAndDistance.distance);
+    debug.log('NearestPlace', nearestPlaceAndDistance.place.id);
+    debug.log('Latitude:', you.position.latitude);
+    debug.log('Longitude:', you.position.longitude);
+    if (nearestPlaceAndDistance.distance < 200)
+    {
+        // alert('REACHED PLACE!');
+        // playSoundForNearestPlace();
 
-    if (nearestPlaceAndDistance.distance < 20)
-    { // distanceTo(cool.position) <  cool.playDistance && cool.havePlayed == false) {
-        // Showing button
-        $('#button').css({
-            'display': 'initial',
-            "left": center.left - $('#button').width() / 2.0,
-            "top": center.top*1.5 - $('#button').height() / 2.0
-        });
+        $("#story #storyfound").show();
+        $("#story #playstoryfound").show();
+        // debug.log("Button", $("#button"))
+    }  // else {
+    //     // Hiding button if leaving correct span
+    //     $('#button').hide();
+    // }
 
-    } else {
-        // Hiding button if leaving correct span
-        $('#button').css('display', 'none');
-    }
-
-    debug.log("Lat", you.position.latitude);
-    debug.log("Lon", you.position.longitude);
+    // debug.log("Lat", you.position.latitude);
+    // debug.log("Lon", you.position.longitude);
 }
 
 
@@ -570,11 +583,6 @@ $(function () {
     you.init();
     audioPlayer.init();
     router.init();
-
-    $("#button").click(function()
-    {
-        playSoundForNearestPlace();
-    });
 
     capabilities.hasGPSSupport = navigator.geolocation;
     capabilities.hasOrientationSupport = window.DeviceOrientationEvent;

@@ -14,7 +14,7 @@ html {
 }
 
 /* HACK, everything is covered by the background image */
-#splash-scene h1, p
+#splash-scene h1, #splash-scene p
 {
     display: none;
 }
@@ -29,14 +29,19 @@ html {
 
 #loading-scene
 {
-    background-color: green;
-
-
+    background-image: url(/static/img/loading.png);
+    background-size: 320px 480px;
     width: 320px;
     height: 480px;
 
     margin-left:auto;
     margin-right:auto;
+}
+
+/* HACK, everything is covered by the background image */
+#loading-scene h1, #loading-scene p
+{
+    display: none;
 }
 
 #no-gps-scene
@@ -75,6 +80,42 @@ html {
     z-index: 100;
 }
 
+#story
+{
+    position: relative;
+}
+
+#storyfound
+{
+    position: relative;
+    background-image: url(/static/img/storyfound.png);
+    background-size: 320px 480px;
+    width: 320px;
+    height: 480px;
+    top: 50px;
+    left: 10px;
+
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#playstoryfound
+{
+    background-image: url(/static/img/playstoryfound.png);
+    background-size: 320px 480px;
+
+    width: 320px;
+    height: 60px;
+}
+
+#playstoryfound
+{
+    background-image: url(/static/img/pausestoryfound.png);
+    background-size: 320px 480px;
+    width: 320px;
+    height: 60px;
+}
+
 #debug {
     display: none;
     color: black;
@@ -83,15 +124,6 @@ html {
     position: fixed;
     top: 0px;
     left: 0px;
-}
-
-#alert
-{
-    margin-left: auto;
-    margin-right: auto;
-    width: 200px;
-    height: 200px;
-    background-color: blue;
 }
 
 .place
