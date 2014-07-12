@@ -14,27 +14,46 @@
     <script type="text/javascript" src="/static/js/app.js"></script>
   </head>
   <body>
-    <div id="alert">
-      <button id="start-button">Byrja!</button>
+    <div id="splash-scene">
+      <h1>Arfsagnir</h1>
+      <p>Sögur innfæddra um Siglufjörð eru fjársjóður.</p>
+      <p>Gangið í átt að táknunum á skjánum til að finna sögurnar.</p>
+      <p>Takið heyrnatólin með!</p>
+      <a class="navigation" href="#loading-scene">Byrja</a>
     </div>
-    <div id="viewport">
+
+    <div id="loading-scene">
+      <h1>Augnablik!</h1>
+      <p>Sæki sögur</p>
+    </div>
+
+    <div id="no-gps-scene">
+      <h1>:-(</h1>
+      <p>Þú kemst því miður ekki í fjársjóðsleit, því við finnum ekki GPS hnitin þín...</p>
+      <p>Þú getur hlustað á sögurnar þrátt fyrir það.</p>
+      <a class="navigation" href="#story-scene">Áfram</a>
+    </div>
+
+    <div id="map-scene">
       <canvas id="canvas"></canvas>
       <div id='map'></div>
       <img id="you" src="/static/img/you.png" />
       <img id='button' src="/static/img/button.png" />
-      <div id="debug">
-        <div id="location">
-          <label>Lat:</label>
-          <input id="lat" />
-
-          <label>Lon:</label>
-          <input id="lon" />
-        </div>
-        <pre></pre>
-      </div>
     </div>
+
     <div id="soundport">
-      <audio id="test" src="https://dl.dropboxusercontent.com/u/120904315/arfsagnir.m4a"  />
+      <audio id="test" src="https://dl.dropboxusercontent.com/u/120904315/arfsagnir.m4a" />
+    </div>
+
+    <div id="debug">
+      <div id="location">
+        <label>Lat:</label>
+        <input id="lat" />
+
+        <label>Lon:</label>
+        <input id="lon" />
+      </div>
+      <pre></pre>
     </div>
   </body>
 </html>
