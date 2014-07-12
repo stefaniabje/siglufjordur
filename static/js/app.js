@@ -350,10 +350,10 @@ var mapScene = {
 
             playSoundForNearestPlace(); // TODO: If implementing pause, then must check for resume
 
-            $(this).attr("class", "pause-nearest-story");
+            $(this).attr("class", "stop-nearest-story");
         });
 
-        $("#story-found .pause-nearest-story").click(function(event)
+        $("#story-found .stop-nearest-story").click(function(event)
         {
             event.preventDefault();
 

@@ -233,7 +233,7 @@ html {
 
     margin-right: auto;
 
-    border: 1px solid black;
+    /*border: 1px solid black;*/
 
     left: 35px;
     bottom: 100px;
@@ -244,23 +244,6 @@ html {
     position: absolute;
 
     background-image: url(/static/img/playstoryfound.png);
-    background-size: 320px 60px;
-
-    width: 320px;
-    height: 60px;
-
-    display: block;
-
-    text-indent: -10000000px;
-
-    bottom: 60px;
-}
-
-.pause-nearest-story
-{
-    position: absolute;
-
-    background-image: url(/static/img/pausestoryfound.png);
     background-size: 320px 98px;
 
     width: 320px;
@@ -270,7 +253,24 @@ html {
 
     text-indent: -10000000px;
 
-    bottom: 60px;
+    bottom: 40px;
+}
+
+.stop-nearest-story
+{
+    position: absolute;
+
+    background-image: url(/static/img/stopstoryfound.png);
+    background-size: 320px 98px;
+
+    width: 320px;
+    height: 98px;
+
+    display: block;
+
+    text-indent: -10000000px;
+
+    bottom: 40px;
 }
 
 
