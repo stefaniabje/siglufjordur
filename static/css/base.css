@@ -2,7 +2,55 @@ html {
     background-color: #fff;
 }
 
-#viewport
+#splash-scene
+{
+    background-image: url(/static/img/splash-scene.png);
+    background-size: 320px 480px;
+    width: 320px;
+    height: 480px;
+
+    margin-left:auto;
+    margin-right:auto;
+}
+
+/* HACK, everything is covered by the background image */
+#splash-scene h1, p
+{
+    display: none;
+}
+
+#splash-scene a
+{
+    display: block;
+    width: 320px;
+    height: 480px;
+    text-indent: -1000000px;
+}
+
+#loading-scene
+{
+    background-color: green;
+
+
+    width: 320px;
+    height: 480px;
+
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#no-gps-scene
+{
+    background-image: url(/static/img/no-gps-scene.png);
+    background-size: 320px 480px;
+    width: 320px;
+    height: 480px;
+
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#map-scene
 {
     width:100%;
     height:100%;

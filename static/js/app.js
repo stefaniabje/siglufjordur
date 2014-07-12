@@ -82,7 +82,6 @@ var you = {
 
 var nearestPlace;
 
-
 var crossbow = {
     id: "crossbow",
     position: {latitude: 66.144336, longitude: -18.916552},
@@ -184,8 +183,22 @@ var audioPlayer = {
     _player : null,
     init: function()
     {
+        var self = this;
+
         this._player = $("#test")[0];
         this._bindTimeupdate();
+
+        $("#test").bind("canplaythrough", function()
+        {
+            self.hasPreloadedAudioSprite = true;
+
+            if(self._preloadOnCompletionCallback)
+            {
+                self._preloadOnCompletionCallback();
+            }
+
+            $(this).unbind("canplaythrough");
+        });
     },
 
     _bindTimeupdate: function()
@@ -210,12 +223,16 @@ var audioPlayer = {
         });
     },
 
-    preloadAudioSprite: function()
+    _preloadOnCompletionCallback: null,
+    hasPreloadedAudioSprite: false,
+    preloadAudioSprite: function(onCompletionCallback)
     {
         // This is a hack to preload the whole audio file without actually playing
         // a sound. Must be initalized from a touch event context on mobile.
         this._player.play();
         this._player.pause();
+
+        this._preloadOnCompletionCallback = onCompletionCallback;
     },
 
     playSoundForPlace: function (place)
@@ -251,97 +268,164 @@ var debug = {
     }
 };
 
-
-$(function () {
-    you.init();
-    audioPlayer.init();
-
-    var $map = $("#map");
-    // Top left of map is the center of the screen
-    $map.css({
-        "left": center.left,
-        "top": center.top
-    });
-
-    var canvas = $("#canvas")[0];
-
-    canvas.width = windowWidth * DEVICE_PIXEL_RADIO;
-    canvas.height = windowHeight * DEVICE_PIXEL_RADIO;
-
-    canvas.style.width = "" + windowWidth + "px";
-    canvas.style.height = "" + windowHeight + "px";
-
-
-    // Initialize places
-    for (var placeIndex in places) {
-        var place = places[placeIndex];
-
-        place.havePlayed = false;
-
-        var $place = $("<img />", {
-            "id": place.id,
-            "src": "/static/img/" + place.id + ".png",
-            "class": "place"
-        });
-
-        $map.append($place);
-    }
-
-    $("#viewport").height(windowHeight);
-
-    $("#you").css("left", windowWidth / 2.0 - $("#you").width() / 2.0);
-    $("#you").css("top", windowHeight / 2.0 - $("#you").height() / 2.0);
-
-
-    // If we access the user's geolocation:
-    if (navigator.geolocation) {
-        // Follow position changes as events
-        navigator.geolocation.watchPosition(positionChanged);
-    }
-    else {
-        alert("No GPS!");
-    }
-
-    // If the user's device has orientation (LG7II does not have it for example)
-    if (window.DeviceOrientationEvent) {
-        // Follow the orientation changes as events
-        window.addEventListener('deviceorientation', deviceOrientationChanged, false);
-    }
-    else {
-        alert("No compass!");
-    }
-
-    $("#button").css({
-       'position': 'relative',
-       width: '100px',
-       'z-index': '500'
-    });
-    $("#button").hide();
-
-    $("#viewport").hide();
-
-    $("#start-button").click(function()
-    {
-        audioPlayer.preloadAudioSprite();
-
-        $(this).text("Loading ...");
-    });
-
-    $("#test").bind("canplaythrough", function()
-    {
-        $("#alert").hide();
-        $("#viewport").show();
-
-        $(this).unbind("canplaythrough");
-    });
-
-    $("#button").click(function()
-    {
-        playSoundForNearestPlace();
-    });
-});
+var capabilities = {
+    hasGPSSupport: false,
+    hasOrientationSupport: false
+};
 
 var nearestPlaceAndDistance = null;
+
+
+var splashScene = {
+    id: "splash-scene",
+    init: null
+};
+
+var noGPSScene = {
+    id: "no-gps-scene",
+    init: null
+};
+
+var loadingScene = {
+    id: "loading-scene",
+    init: function(transitionCallback)
+    {
+        transitionCallback();
+        if(audioPlayer.hasPreloadedAudioSprite === false)
+        {
+            audioPlayer.preloadAudioSprite(function()
+            {
+                router.switchToScene("map-scene");
+            });
+        }
+        else
+        {
+            router.switchToScene("map-scene");
+        }
+    }
+};
+
+var mapScene = {
+    id: "map-scene",
+    init: function(transitionCallback)
+    {
+        if (navigator.geolocation) {
+            // Follow position changes as events
+            navigator.geolocation.watchPosition(positionChanged)
+        }
+
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', deviceOrientationChanged, false);
+        }
+
+        this._initMap();
+
+        $("#button").css({
+           'position': 'relative',
+           width: '100px',
+           'z-index': '500'
+        });
+        $("#button").hide();
+
+        transitionCallback();
+    },
+
+    _initMap: function()
+    {
+        // Top left of map is the center of the screen
+        $("#map").css({
+            "left": center.left,
+            "top": center.top
+        });
+
+        this._initCanvas();
+        this._initPlaces();
+
+        $("#map-scene").height(windowHeight);
+
+        $("#you").css("left", windowWidth / 2.0 - $("#you").width() / 2.0);
+        $("#you").css("top", windowHeight / 2.0 - $("#you").height() / 2.0);
+    },
+
+    _initCanvas: function()
+    {
+        var canvas = $("#canvas")[0];
+
+        canvas.width = windowWidth * DEVICE_PIXEL_RADIO;
+        canvas.height = windowHeight * DEVICE_PIXEL_RADIO;
+
+        canvas.style.width = "" + windowWidth + "px";
+        canvas.style.height = "" + windowHeight + "px";
+    },
+
+    _initPlaces: function()
+    {
+        var $map = $("#map");
+
+        // Initialize places
+        for (var placeIndex in places) {
+            var place = places[placeIndex];
+
+            place.havePlayed = false;
+
+            var $place = $("<img />", {
+                "id": place.id,
+                "src": "/static/img/" + place.id + ".png",
+                "class": "place"
+            });
+
+            $map.append($place);
+        }
+    }
+};
+
+var router = {
+    _currentSceneID: null,
+    _scenes: {
+        "splash-scene": splashScene,
+        "loading-scene": loadingScene,
+        "map-scene": mapScene,
+        "no-gps-scene": noGPSScene
+    },
+    init: function()
+    {
+        for(var sceneID in this._scenes)
+        {
+            $("#" + sceneID).hide();
+        }
+
+        var self = this;
+
+        $("a.navigation").click(function(event) {
+            event.preventDefault();
+
+            self.switchToScene($(this).attr("href").replace("#", ""));
+        });
+    },
+    switchToScene: function(nextSceneID)
+    {
+        var scene = this._scenes[nextSceneID];
+        if(scene.init)
+        {
+            var self = this;
+            scene.init(function()
+            {
+                self._setCurrentScene(nextSceneID);
+            });
+        }
+        else
+        {
+            this._setCurrentScene(nextSceneID);
+        }
+    },
+
+    _setCurrentScene: function(nextSceneID)
+    {
+        $("#" + this._currentSceneID).hide();
+        $("#" + nextSceneID).show();
+        this._currentSceneID = nextSceneID;
+    }
+};
 
 function playSoundForNearestPlace()
 {
@@ -354,7 +438,7 @@ function positionChanged(position) {
 
     nearestPlaceAndDistance = findNearestPlace(you);
 
-    console.log("NearestPlace:" + nearestPlaceAndDistance.place.id);
+    console.log("NearestPlace: " + nearestPlaceAndDistance.place.id);
 
     renderMap();
 }
@@ -488,3 +572,27 @@ function pixelfy(you, place_position) {
         y: - (place_position.latitude - you.position.latitude) * pxls_per_degree.latitude};
     return px_position;
 }
+
+
+$(function () {
+    you.init();
+    audioPlayer.init();
+    router.init();
+
+    $("#button").click(function()
+    {
+        playSoundForNearestPlace();
+    });
+
+    capabilities.hasGPSSupport = navigator.geolocation;
+    capabilities.hasOrientationSupport = window.DeviceOrientationEvent;
+
+    if(capabilities.hasGPSSupport)
+    {
+        router.switchToScene("splash-scene");
+    }
+    else
+    {
+        router.switchToScene("no-gps-scene");
+    }
+});
