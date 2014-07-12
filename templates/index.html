@@ -19,7 +19,7 @@
       <p>Sögur innfæddra um Siglufjörð eru fjársjóður.</p>
       <p>Gangið í átt að táknunum á skjánum til að finna sögurnar.</p>
       <p>Takið heyrnatólin með!</p>
-      <a class="navigation" href="#loading-scene">Byrja</a>
+      <a class="navigation" href="#loading-scene" data="map-scene">Byrja</a>
     </div>
 
     <div id="loading-scene">
@@ -31,7 +31,7 @@
       <h1>:-(</h1>
       <p>Þú kemst því miður ekki í fjársjóðsleit, því við finnum ekki GPS hnitin þín...</p>
       <p>Þú getur hlustað á sögurnar þrátt fyrir það.</p>
-      <a class="navigation" href="#story-scene">Áfram</a>
+      <a class="navigation" href="#loading-scene" data="story-scene">Áfram</a>
     </div>
 
     <div id="map-scene">
@@ -44,6 +44,13 @@
       <img id="you" src="/static/img/you.png" />
     </div>
 
+    <div id="story-scene">
+      <h1>Arfsagnir</h1>
+      <p class="copy">Sögur innfæddra um Siglufjörð eru fjársjóður</p>
+      <p>Fjársjóðsleitin virkar einungis á snjallsímum og spjaldtölvum.</p>
+      <p>Við hvetjum þig auðvitað út í göngutúr, en þú getur einning hlustað á sögurnar hér að neðan.</p>
+      <ul id="stories"></ul>
+    </div>
 
     <div id="soundport">
       <audio id="test" src="https://dl.dropboxusercontent.com/u/120904315/arfsagnir.m4a" />

@@ -87,6 +87,7 @@ var nearestPlace;
 
 var catalina = {
     id: "catalina",
+    title: "Catalina",
     position: {latitude: 66.145453, longitude: -18.913870},
     timecode: {start: 0, end: 1*60+12},
     playDistance: 60
@@ -94,6 +95,7 @@ var catalina = {
 
 var blockage = {
     id: "blockage",
+    title: "Stíflan",
     position: {latitude: 66.145453, longitude: -18.913870},
     timecode: {start: 1*60+13, end: 3*60+41},
     playDistance: 5
@@ -101,6 +103,7 @@ var blockage = {
 
 var skramuhyrna = {
     id: "skramuhyrna",
+    title: "Skrámuhyrna",
     position: {latitude: 66.181559, longitude: -18.923616},
     timecode: {start: 3*60+42, end: 6*60+30},
     playDistance: 5
@@ -108,6 +111,7 @@ var skramuhyrna = {
 
 var arcticstern = {
     id: "arcticstern",
+    title: "Kríuvarpið",
     position: {latitude: 66.135502, longitude: -18.921606},
     timecode: {start: 6*60+30, end: 8*60+45},
     playDistance: 5
@@ -115,6 +119,7 @@ var arcticstern = {
 
 var skull = {
     id: "skull",
+    title: "Hauskúpan",
     position: {latitude: 66.148008, longitude: -18.912512},
     timecode: {start: 8*60+46, end: 10*60+49},
     playDistance: 5
@@ -122,6 +127,7 @@ var skull = {
 
 var betweenshipandshore = {
     id: "betweenshipandshore",
+    title: "Á milli skips og bryggju",
     position: {latitude: 66.147946, longitude: -18.902645},
     timecode: {start: 10*60+50, end: 13*60+56},
     playDistance: 5
@@ -129,6 +135,7 @@ var betweenshipandshore = {
 
 var crossbow = {
     id: "crossbow",
+    title: "Lásboginn",
     position: {latitude: 66.144336, longitude: -18.916552},
     timecode: {start: 13*60+57, end: 15*60+32},
     playDistance: 5
@@ -136,6 +143,7 @@ var crossbow = {
 
 var hvanneyrarskal = {
     id: "hvanneyrarskal",
+    title: "Hvanneyrarskál",
     position: {latitude: 66.158233, longitude: -18.917498},
     timecode: {start: 15*60+33, end: 17*60+46},
     playDistance: 5
@@ -143,6 +151,7 @@ var hvanneyrarskal = {
 
 var raudka = {
     id: "raudka",
+    title: "Rauðka",
     position: {latitude: 66.149680, longitude: -18.905918},
     timecode: {start: 17*60+47, end: 20*60+4},
     playDistance: 5
@@ -150,6 +159,7 @@ var raudka = {
 
 var onland = {
     id: "onland",
+    title: "Á landi",
     position: {latitude: 66.154025, longitude: -18.904471},
     timecode: {start: 20*60+4, end: 25*60+13},
     playDistance: 5
@@ -167,6 +177,14 @@ var onland = {
 var places = [catalina, blockage, skramuhyrna, arcticstern,
     skull, betweenshipandshore, crossbow, hvanneyrarskal,
     raudka, onland];
+
+
+var placesByID = {};
+for(var placeIndex in places)
+{
+    var place = places[placeIndex];
+    placesByID[place.id] = place;
+}
 
 // pixels per km
 // TODO convert scale to be relative to pixels per screen!
@@ -288,26 +306,26 @@ var noGPSScene = {
 
 var loadingScene = {
     id: "loading-scene",
-    init: function(transitionCallback)
+    init: function(data, transitionCallback)
     {
         transitionCallback();
         if(audioPlayer.hasPreloadedAudioSprite === false)
         {
             audioPlayer.preloadAudioSprite(function()
             {
-                router.switchToScene("map-scene");
+                router.switchToScene(data);
             });
         }
         else
         {
-            router.switchToScene("map-scene");
+            router.switchToScene(data);
         }
     }
 };
 
 var mapScene = {
     id: "map-scene",
-    init: function(transitionCallback)
+    init: function(data, transitionCallback)
     {
         if (navigator.geolocation) {
             // Follow position changes as events
@@ -371,7 +389,7 @@ var mapScene = {
 
             var $place = $("<img />", {
                 "id": place.id,
-                "src": "/static/img/" + place.id + ".png",
+                "src": "/static/img/places/background/" + place.id + ".png", // TODO: Should refactor into a function.
                 "class": "place"
             });
 
@@ -380,13 +398,64 @@ var mapScene = {
     }
 };
 
+var storyScene = {
+    id: "story-scene",
+    init: function(data, transitionCallback)
+    {
+        var $stories = $("#stories");
+        for (var placeIndex in places) {
+            var place = places[placeIndex];
+
+            var $placeRow = $("<li></li>", {
+                "id": "story-" + place.id,
+                "class": "story clearfix"
+            });
+
+            var $icon = $("<img />", {
+                "src": "/static/img/places/no-background/" + place.id + ".png",
+            });
+
+            var $name = $("<h2>" + place.title + "</h2>");
+            $name.css({
+                "background-image": "url(/static/img/story-scene/stories/" + place.id + ".png)"
+            });
+
+            var $playButton = $("<a>Hlusta</a>");
+            $playButton.attr({
+                "class": "play-story",
+                "href": "#" + place.id
+            });
+
+            $placeRow.append($icon);
+            $placeRow.append($name);
+            $placeRow.append($playButton);
+
+            $stories.append($placeRow);
+        }
+
+        $(".play-story").click(function(event)
+        {
+            event.preventDefault();
+
+            var placeId = $(this).attr("href").replace("#", "");
+
+            var place = placesByID[placeId];
+
+            audioPlayer.playSoundForPlace(place);
+        })
+
+        transitionCallback();
+    }
+}
+
 var router = {
     _currentSceneID: null,
     _scenes: {
         "splash-scene": splashScene,
         "loading-scene": loadingScene,
         "map-scene": mapScene,
-        "no-gps-scene": noGPSScene
+        "no-gps-scene": noGPSScene,
+        "story-scene": storyScene
     },
     init: function()
     {
@@ -400,16 +469,19 @@ var router = {
         $("a.navigation").click(function(event) {
             event.preventDefault();
 
-            self.switchToScene($(this).attr("href").replace("#", ""));
+            self.switchToScene(
+                $(this).attr("href").replace("#", ""),
+                $(this).attr("data")
+            );
         });
     },
-    switchToScene: function(nextSceneID)
+    switchToScene: function(nextSceneID, data)
     {
         var scene = this._scenes[nextSceneID];
         if(scene.init)
         {
             var self = this;
-            scene.init(function()
+            scene.init(data, function()
             {
                 self._setCurrentScene(nextSceneID);
             });
